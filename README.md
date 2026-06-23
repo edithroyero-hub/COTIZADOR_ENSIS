@@ -2,16 +2,41 @@
 
 Cotizador interactivo HTML para servicios de vigilancia y seguridad privada en Colombia, conforme a la normativa vigente 2026.
 
+## 🔐 Acceso protegido
+
+El cotizador tiene protección de acceso. Al abrirlo te pedirá una contraseña.
+
+**Contraseña inicial**: `ENSIS2026`
+
+La sesión queda activa por **8 horas** después de cada login (almacenada en `sessionStorage` del navegador).
+
+### Cómo cambiar la contraseña
+
+1. Abre una pestaña del navegador y ve a la consola con `F12`
+2. Pega esto reemplazando `MI_NUEVA_CONTRASEÑA` por la contraseña nueva:
+   ```js
+   crypto.subtle.digest('SHA-256', new TextEncoder().encode('MI_NUEVA_CONTRASEÑA'))
+     .then(h => console.log(Array.from(new Uint8Array(h)).map(b => b.toString(16).padStart(2,'0')).join('')))
+   ```
+3. Copia el hash que aparece en la consola
+4. Abre `index.html` con un editor y busca la línea:
+   ```js
+   const HASH_PASSWORD = "...";
+   ```
+5. Reemplaza el valor entre comillas por el hash nuevo
+6. Guarda, haz commit y push
+
 ## Características
 
 - **Multi-servicio**: cotiza varios servicios al mismo cliente con modalidades, sectores y armamento independientes
 - **27 modalidades estándar** del tarifario Supervigilancia + opción personalizada (horas/días no estándar)
 - **3 tarifarios 2026**: Ene-Jun (jornada 44h), Jul 1-14 y Jul 15-Dic (jornada 42h por Ley 2101 + Circular 0040)
 - **Cotización por meses o por días** (eventos cortos)
-- **Adicionales por turno**: guardia extra diurno ($80.000) o nocturno ($100.000) configurables
-- **Parámetros editables en vivo**: % Reinversión, % Comisión, % Administrativo, % IVA, % Renta
+- **Adicionales por turno**: guardia extra diurno ($80.000) o nocturno ($100.000) configurables, multiplicados por días a trabajar/mes
+- **Parámetros editables en vivo**: % Reinversión (sobre Total sin IVA), % Comisión OC, % Administrativo OC, % IVA, % Renta
+- **Bloque D Otros Costos**: valor unitario y cantidad editables (uniformes, exámenes, EPP, comunicación, etc.)
 - **Auditoría automática** con veredicto en vivo (OK / ATENCIÓN / ALERTA / FALLO según margen neto)
-- **Entregable cliente limpio** (solo lo cotizado + compromiso de reinversión)
+- **Entregable cliente limpio** (solo servicios con valor cotizado + compromiso de reinversión)
 - **Exportar / Importar Excel** (.xlsx) e **Importar/Exportar JSON** para iteración con cliente
 - **Guardado automático** en navegador (localStorage)
 
@@ -19,8 +44,9 @@ Cotizador interactivo HTML para servicios de vigilancia y seguridad privada en C
 
 1. Descarga el archivo `index.html`
 2. Doble-click para abrir en cualquier navegador moderno (Chrome, Edge, Firefox)
-3. Llena los datos del cliente, periodo y configura los servicios cotizados
-4. Genera el entregable cliente o exporta a Excel
+3. Ingresa la contraseña en el login
+4. Llena los datos del cliente, periodo y configura los servicios cotizados
+5. Genera el entregable cliente o exporta a Excel
 
 ## Normativa aplicada (Colombia 2026)
 
@@ -38,13 +64,14 @@ Cotizador interactivo HTML para servicios de vigilancia y seguridad privada en C
 - Conexión a internet la primera vez (carga librería SheetJS para Export/Import Excel)
 - Funciona offline después de la primera carga
 
-## Estructura del archivo
+## ⚠ Nota de seguridad
 
-`index.html` es un archivo HTML autocontenido con:
-- HTML para la UI
-- CSS embebido para los estilos
-- JavaScript embebido para la lógica de cálculo y persistencia
-- Datos de los 3 tarifarios 2026 embebidos como objetos JS
+El login es **client-side**: protege contra acceso casual pero un usuario técnico con conocimientos avanzados podría inspeccionar el código y bypassear el login (es la naturaleza de cualquier HTML estático). Para seguridad real:
+
+1. **Mantener el repositorio PRIVADO** en GitHub (recomendado)
+2. **No publicar GitHub Pages** o protegerlo con Cloudflare Access si lo haces público
+3. **Compartir el HTML solo con personas autorizadas**
+4. **Cambiar la contraseña periódicamente**
 
 ## Licencia
 

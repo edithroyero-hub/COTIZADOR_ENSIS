@@ -62,6 +62,22 @@
 </style>
 </head>
 <body>
+
+<!-- =====================================================
+     OVERLAY DE LOGIN — Protección de acceso al cotizador
+     ===================================================== -->
+<div id="loginOverlay" style="position:fixed; top:0; left:0; right:0; bottom:0; background:linear-gradient(135deg, #1a3a5c 0%, #0f2236 100%); z-index:99999; display:flex; align-items:center; justify-content:center;">
+  <div style="background:#fff; padding:40px; border-radius:10px; text-align:center; max-width:420px; width:90%; box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+    <div style="background:#f4c542; color:#1a3a5c; padding:10px 16px; border-radius:6px; font-size:11px; font-weight:bold; letter-spacing:1px; display:inline-block; margin-bottom:18px;">EDITH ROYERO | FINANCIERA</div>
+    <h2 style="color:#1a3a5c; margin:0 0 8px 0; font-size:22px;">ENSIS Security</h2>
+    <div style="color:#666; font-size:13px; margin-bottom:24px;">Acceso restringido al cotizador</div>
+    <input type="password" id="loginPassword" placeholder="Contraseña" autofocus style="width:100%; padding:14px; font-size:16px; border:2px solid #1a3a5c; border-radius:6px; box-sizing:border-box; outline:none;">
+    <button onclick="verificarLogin()" style="width:100%; padding:14px; background:#1a3a5c; color:#fff; border:none; border-radius:6px; cursor:pointer; font-size:15px; font-weight:600; margin-top:12px;">🔓 Acceder</button>
+    <div id="loginError" style="color:#dc3545; margin-top:12px; font-size:13px; display:none; font-weight:bold;">⚠ Contraseña incorrecta</div>
+    <div style="color:#999; font-size:11px; margin-top:22px; line-height:1.5;">Material confidencial de ENSIS Security Ltda.<br>El acceso queda registrado por sesión.</div>
+  </div>
+</div>
+
 <div class="container">
 
 <header>
@@ -233,6 +249,7 @@
   <button class="secundario" onclick="document.getElementById('inputImport').click()">📂 Importar JSON</button>
   <input type="file" id="inputImport" accept=".json" style="display:none;" onchange="importarJSON(event)">
   <button class="peligro" onclick="limpiarTodo()">🗑️ Limpiar todo</button>
+  <button class="secundario" onclick="cerrarSesion()" style="margin-left:auto;">🔒 Cerrar sesión</button>
 </div>
 
 <div id="indicadorGuardado" style="position:fixed; bottom:20px; right:20px; background:#28a745; color:#fff; padding:8px 14px; border-radius:20px; font-size:12px; box-shadow:0 2px 6px rgba(0,0,0,0.2); opacity:0; transition:opacity 0.3s; z-index:9999;">
@@ -247,6 +264,67 @@
 </div>
 
 <script>
+// =====================================================
+// LOGIN — Protección de acceso (client-side)
+// =====================================================
+// Hash SHA-256 de la contraseña actual: "ENSIS2026"
+// Para cambiar la contraseña: ver instrucciones en el README del repositorio
+const HASH_PASSWORD = "a901001ae3e4a73af8831c3442ab2a264352c5567653bd64ab29cb24223dc697";
+const SESION_HORAS = 8; // sesión válida por 8 horas
+
+async function sha256(text) {
+  const buf = new TextEncoder().encode(text);
+  const hash = await crypto.subtle.digest('SHA-256', buf);
+  return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+async function verificarLogin() {
+  const pwd = document.getElementById('loginPassword').value;
+  const hash = await sha256(pwd);
+  if (hash === HASH_PASSWORD) {
+    document.getElementById('loginOverlay').style.display = 'none';
+    const expira = Date.now() + (SESION_HORAS * 60 * 60 * 1000);
+    sessionStorage.setItem('cotizador_auth', String(expira));
+    document.getElementById('loginPassword').value = '';
+    document.getElementById('loginError').style.display = 'none';
+  } else {
+    document.getElementById('loginError').style.display = 'block';
+    document.getElementById('loginPassword').value = '';
+    document.getElementById('loginPassword').focus();
+  }
+}
+
+function cerrarSesion() {
+  if (!confirm('¿Cerrar sesión? Tendrás que volver a ingresar la contraseña.')) return;
+  sessionStorage.removeItem('cotizador_auth');
+  location.reload();
+}
+
+function verificarSesionActiva() {
+  const expira = sessionStorage.getItem('cotizador_auth');
+  if (!expira) return false;
+  if (Date.now() > parseInt(expira)) {
+    sessionStorage.removeItem('cotizador_auth');
+    return false;
+  }
+  return true;
+}
+
+// Si ya hay sesión activa, ocultar el login overlay
+if (verificarSesionActiva()) {
+  document.getElementById('loginOverlay').style.display = 'none';
+}
+
+// Enter en el campo de contraseña hace submit
+document.addEventListener('DOMContentLoaded', () => {
+  const inputPwd = document.getElementById('loginPassword');
+  if (inputPwd) {
+    inputPwd.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') verificarLogin();
+    });
+  }
+});
+
 // =====================================================
 // DATA: tarifarios 2026
 // =====================================================
