@@ -1,0 +1,1772 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Cotizador ENSIS Security 2026 — Interactivo Multi-Servicio</title>
+<style>
+  * { box-sizing: border-box; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; margin: 0; padding: 20px; background: #f4f6f8; color: #222; }
+  .container { max-width: 1400px; margin: 0 auto; }
+  header { background: #1a3a5c; color: #fff; padding: 18px 24px; border-radius: 8px 8px 0 0; display: flex; justify-content: space-between; align-items: center; }
+  header h1 { margin: 0; font-size: 22px; }
+  header .sello { font-size: 13px; font-weight: bold; background: #f4c542; color: #1a3a5c; padding: 6px 12px; border-radius: 4px; }
+  .panel { background: #fff; padding: 20px; margin-bottom: 16px; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+  .panel h2 { margin-top: 0; color: #1a3a5c; border-bottom: 2px solid #f4c542; padding-bottom: 8px; font-size: 17px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; }
+  label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 4px; color: #444; }
+  select, input[type=number], input[type=text], input[type=date] { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; }
+  input:focus, select:focus { outline: none; border-color: #1a3a5c; box-shadow: 0 0 0 2px rgba(26,58,92,0.2); }
+  .editable { background: #fff8d6; border-color: #f4c542 !important; font-weight: bold; }
+  table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; }
+  th { background: #1a3a5c; color: #fff; padding: 8px; text-align: left; }
+  td { padding: 6px 8px; border-bottom: 1px solid #eee; }
+  tr.subtotal td { background: #f4f6f8; font-weight: bold; }
+  tr.total td { background: #1a3a5c; color: #fff; font-weight: bold; font-size: 14px; }
+  td.num { text-align: right; font-variant-numeric: tabular-nums; }
+  .veredicto { padding: 14px; border-radius: 6px; font-size: 16px; font-weight: bold; text-align: center; margin-top: 12px; }
+  .veredicto.ok { background: #d4edda; color: #155724; border: 2px solid #28a745; }
+  .veredicto.atencion { background: #fff3cd; color: #856404; border: 2px solid #ffc107; }
+  .veredicto.alerta { background: #f8d7da; color: #721c24; border: 2px solid #dc3545; }
+  .resumen-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 16px; }
+  .card { background: #fff; padding: 14px; border-radius: 6px; border-left: 4px solid #1a3a5c; }
+  .card .label { font-size: 12px; color: #666; text-transform: uppercase; letter-spacing: 0.5px; }
+  .card .value { font-size: 20px; font-weight: bold; color: #1a3a5c; margin-top: 4px; }
+  .card.positivo { border-left-color: #28a745; } .card.positivo .value { color: #28a745; }
+  .card.negativo { border-left-color: #dc3545; } .card.negativo .value { color: #dc3545; }
+  .acciones { display: flex; gap: 10px; justify-content: flex-end; margin-top: 16px; }
+  button { padding: 10px 18px; background: #1a3a5c; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: 600; }
+  button:hover { background: #0f2236; }
+  button.secundario { background: #6c757d; }
+  button.peligro { background: #dc3545; padding: 6px 12px; font-size: 13px; }
+  button.exito { background: #28a745; }
+  footer { text-align: center; padding: 16px; color: #666; font-size: 12px; margin-top: 20px; }
+  footer .sello { font-weight: bold; color: #1a3a5c; }
+  .nota { font-size: 12px; color: #666; font-style: italic; margin-top: 6px; }
+  .input-row { display: flex; align-items: center; gap: 8px; }
+  .input-row input { flex: 1; }
+  .input-row span { font-size: 13px; color: #666; min-width: 60px; }
+  /* Tarjeta de servicio */
+  .servicio-card { background: #f8f9fb; padding: 16px; border: 2px solid #d8dde3; border-radius: 8px; margin-bottom: 14px; position: relative; }
+  .servicio-card .servicio-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #d8dde3; }
+  .servicio-card .servicio-titulo { font-weight: bold; color: #1a3a5c; font-size: 15px; }
+  .servicio-card .servicio-badge { background: #1a3a5c; color: #fff; padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: bold; }
+  .panel-personalizado { margin-top: 12px; padding: 12px; background: #fff8d6; border-radius: 6px; border: 2px dashed #f4c542; }
+  .panel-personalizado h4 { margin: 0 0 10px 0; color: #1a3a5c; font-size: 13px; }
+  .acciones-servicio { display: flex; gap: 8px; }
+  @media print {
+    body { background: #fff; padding: 0; }
+    .acciones, button { display: none !important; }
+    .panel { box-shadow: none; border: 1px solid #ccc; page-break-inside: avoid; }
+    .servicio-card { background: #fff; border-color: #999; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+<header>
+  <div>
+    <h1>ENSIS SECURITY LTDA. — Cotizador Interactivo Multi-Servicio 2026</h1>
+    <div style="font-size:12px;opacity:0.85;margin-top:4px;">Conforme Circular Externa 20251300000115CS + Decreto 0159/2026 + Circular 0040 MinTrabajo</div>
+  </div>
+  <div class="sello">Edith Royero | Financiera</div>
+</header>
+
+<!-- PANEL 1: DATOS GENERALES DEL CLIENTE -->
+<div class="panel">
+  <h2>1. Datos generales del cliente</h2>
+  <div class="grid">
+    <div>
+      <label>Cliente</label>
+      <input type="text" id="cliente" value="CLIENTE NUEVO" placeholder="Nombre del cliente">
+    </div>
+    <div>
+      <label>Periodo del servicio (tarifario aplicable)</label>
+      <select id="periodo">
+        <option value="enero-junio">Enero-Junio 2026 (jornada 44h)</option>
+        <option value="julio-1al14">Julio 1-14 2026 (jornada 44h)</option>
+        <option value="julio15-diciembre" selected>Julio 15-Dic 2026 (jornada 42h) ★</option>
+      </select>
+    </div>
+    <div>
+      <label>Unidad de duración del contrato</label>
+      <select id="unidadDuracion">
+        <option value="meses" selected>Meses</option>
+        <option value="dias">Días</option>
+      </select>
+      <div class="nota">Para eventos cortos, usa Días</div>
+    </div>
+    <div>
+      <label id="lblCantidadDuracion">Meses del contrato</label>
+      <input type="number" id="cantidadDuracion" value="5.57" min="0.01" step="0.01">
+      <div class="nota" id="notaDuracion">Default 5,57 meses (15-jul a 31-dic)</div>
+    </div>
+    <div>
+      <label>Equivalencia (auto)</label>
+      <div id="equivalenciaDuracion" style="padding:8px; background:#e9ecef; border-radius:4px; font-size:13px; font-weight:bold; color:#1a3a5c;">5,57 meses ≈ 167 días</div>
+    </div>
+  </div>
+</div>
+
+<!-- PANEL 2: LISTA DE SERVICIOS COTIZADOS -->
+<div class="panel">
+  <h2>2. Servicios cotizados al cliente</h2>
+  <div class="nota" style="margin-bottom:12px;">Agrega tantos servicios como necesite el cliente. Cada uno puede tener su propia modalidad, vigilantes y configuración personalizada.</div>
+  <div id="listaServicios"></div>
+  <div style="margin-top:14px; display:flex; gap:10px;">
+    <button class="exito" onclick="agregarServicio()">➕ Agregar otro servicio</button>
+    <button class="secundario" onclick="duplicarUltimoServicio()">📋 Duplicar el último</button>
+  </div>
+</div>
+
+<!-- PANEL 3: PARÁMETROS GLOBALES EDITABLES -->
+<div class="panel">
+  <h2>3. Parámetros editables (afectan rentabilidad — aplican a TODOS los servicios)</h2>
+  <div class="grid">
+    <div>
+      <label>% Reinversión (sobre Total SIN IVA)</label>
+      <div class="input-row"><input type="number" id="pctReinversion" value="7.57" min="0" max="50" step="0.01" class="editable"><span>%</span></div>
+      <div class="nota">Default tarifario: 7,57%</div>
+      <div class="valor-calc" id="calcReinversion" style="margin-top:6px; padding:6px 8px; background:#d4edda; border-radius:4px; font-size:13px; font-weight:bold; color:#155724;">= $0</div>
+    </div>
+    <div>
+      <label>% Comisión Otros Costos (sobre Total con IVA)</label>
+      <div class="input-row"><input type="number" id="pctComisionOC" value="2" min="0" max="50" step="0.01" class="editable"><span>%</span></div>
+      <div class="valor-calc" id="calcComisionOC" style="margin-top:6px; padding:6px 8px; background:#d4edda; border-radius:4px; font-size:13px; font-weight:bold; color:#155724;">= $0</div>
+    </div>
+    <div>
+      <label>% Administrativo Otros Costos (sobre Total sin IVA)</label>
+      <div class="input-row"><input type="number" id="pctAdministrativo" value="14" min="0" max="50" step="0.01" class="editable"><span>%</span></div>
+      <div class="valor-calc" id="calcAdministrativo" style="margin-top:6px; padding:6px 8px; background:#d4edda; border-radius:4px; font-size:13px; font-weight:bold; color:#155724;">= $0</div>
+    </div>
+    <div>
+      <label>% IVA (sobre AIU - Art. 462-1 ET)</label>
+      <div class="input-row"><input type="number" id="pctIVA" value="19" min="0" max="30" step="0.01"><span>%</span></div>
+      <div class="valor-calc" id="calcIVA" style="margin-top:6px; padding:6px 8px; background:#d4edda; border-radius:4px; font-size:13px; font-weight:bold; color:#155724;">= $0</div>
+    </div>
+    <div>
+      <label>% Renta (sociedades 2026)</label>
+      <div class="input-row"><input type="number" id="pctRenta" value="35" min="0" max="50" step="0.01"><span>%</span></div>
+      <div class="valor-calc" id="calcRenta" style="margin-top:6px; padding:6px 8px; background:#d4edda; border-radius:4px; font-size:13px; font-weight:bold; color:#155724;">= $0</div>
+    </div>
+  </div>
+</div>
+
+<!-- PANEL 4: TARIFA DE LOS SERVICIOS -->
+<div class="panel">
+  <h2>4. Tarifa consolidada de los servicios</h2>
+  <div id="leyendaUnidad" style="margin-bottom:8px; font-size:13px; color:#1a3a5c; font-weight:bold;"></div>
+  <table>
+    <thead>
+      <tr>
+        <th>#</th><th>Servicio</th><th>Vr Unitario base/mes</th><th>AyS</th>
+        <th>Puestos</th><th>TOTAL MES (ref)</th><th>TOTAL CONTRATO con IVA</th>
+      </tr>
+    </thead>
+    <tbody id="tablaServicio"></tbody>
+  </table>
+</div>
+
+<!-- PANEL 5: TARJETAS DE RESUMEN -->
+<div class="resumen-cards" id="resumenCards"></div>
+
+<!-- PANEL 6: BLOQUE A - NÓMINA CONSOLIDADA -->
+<div class="panel">
+  <h2>5. Bloque A: Nómina consolidada (todos los servicios)</h2>
+  <table>
+    <thead><tr><th>Servicio</th><th>Modalidad</th><th>Vigilantes/puesto</th><th>Puestos</th><th>Total vigilantes</th><th>Costo Nómina Mes</th></tr></thead>
+    <tbody id="tablaNominaResumen"></tbody>
+  </table>
+  <details style="margin-top:14px;">
+    <summary style="cursor:pointer; font-weight:bold; color:#1a3a5c;">Ver desglose por concepto (16 ítems × total vigilantes)</summary>
+    <table style="margin-top:10px;">
+      <thead><tr><th>Concepto</th><th>Vr / Vigilante</th><th>Total Vigilantes</th><th>Total mensual</th></tr></thead>
+      <tbody id="tablaNomina"></tbody>
+    </table>
+  </details>
+</div>
+
+<!-- PANEL 7: BLOQUE D - OTROS COSTOS -->
+<div class="panel">
+  <h2>6. Bloque D: Otros Costos consolidados</h2>
+  <div style="margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;">
+    <span class="nota">💡 Vr Unitario y Cantidad son editables (amarillos). Click en "Restaurar" para volver a los valores por defecto.</span>
+    <button class="secundario" style="font-size:12px; padding:6px 12px;" onclick="restaurarCantidadesOC()">↻ Restaurar valores y cantidades automáticas</button>
+  </div>
+  <table>
+    <thead><tr><th>Concepto</th><th>Vr Unitario (editable)</th><th>Cant (editable)</th><th>Total mensual</th></tr></thead>
+    <tbody id="tablaOtrosCostos"></tbody>
+  </table>
+</div>
+
+<!-- PANEL 8: RENTABILIDAD -->
+<div class="panel">
+  <h2>7. Estructura de rentabilidad (consolidado todos los servicios)</h2>
+  <table>
+    <thead><tr><th>Concepto</th><th>Mensual</th><th id="thRentPeriodo">Periodo total</th><th>% Ingreso</th></tr></thead>
+    <tbody id="tablaRentabilidad"></tbody>
+  </table>
+  <div id="veredictoAuditor" class="veredicto"></div>
+</div>
+
+<!-- PANEL 9: TRAZABILIDAD -->
+<div class="panel">
+  <h2>8. Trazabilidad normativa</h2>
+  <ul style="font-size: 13px; line-height: 1.7;">
+    <li><strong>Circular Externa 20251300000115CS</strong> — Supervigilancia (30-dic-2025): tarifas mínimas 2026</li>
+    <li><strong>Decreto 0159 de 2026</strong> — MinTrabajo (19-feb-2026): SMMLV transitorio $1.750.905</li>
+    <li><strong>Circular 0040 MinTrabajo</strong> (16-abr-2026): jornada 42h/sem sector vigilancia desde 15-jul-2026</li>
+    <li><strong>Ley 2466 de 2025</strong>: recargo dominical 80% en 2026 (90% en 2027, 100% en 2028)</li>
+    <li><strong>Ley 1819 de 2016 art. 65</strong>: exoneración aportes Salud/ICBF/SENA para trabajadores < 10 SMLV</li>
+    <li><strong>Art. 462-1 ET</strong>: IVA con base gravable solo sobre AIU para servicios de vigilancia</li>
+    <li><strong>Ley 2101 de 2021</strong>: reducción progresiva de jornada laboral</li>
+  </ul>
+</div>
+
+<div class="acciones" style="flex-wrap:wrap;">
+  <button onclick="window.print()">🖨️ Imprimir / Guardar como PDF</button>
+  <button class="exito" onclick="generarEntregableCliente()">📄 Generar entregable CLIENTE</button>
+  <button class="exito" onclick="exportarAExcel()">📊 Exportar a Excel (.xlsx)</button>
+  <button class="exito" onclick="document.getElementById('inputImportExcel').click()">📥 Importar desde Excel (.xlsx)</button>
+  <input type="file" id="inputImportExcel" accept=".xlsx,.xls" style="display:none;" onchange="importarDesdeExcel(event)">
+  <button class="secundario" onclick="exportarJSON()">💾 Exportar JSON</button>
+  <button class="secundario" onclick="document.getElementById('inputImport').click()">📂 Importar JSON</button>
+  <input type="file" id="inputImport" accept=".json" style="display:none;" onchange="importarJSON(event)">
+  <button class="peligro" onclick="limpiarTodo()">🗑️ Limpiar todo</button>
+</div>
+
+<div id="indicadorGuardado" style="position:fixed; bottom:20px; right:20px; background:#28a745; color:#fff; padding:8px 14px; border-radius:20px; font-size:12px; box-shadow:0 2px 6px rgba(0,0,0,0.2); opacity:0; transition:opacity 0.3s; z-index:9999;">
+  💾 Guardado automático
+</div>
+
+<footer>
+  <div class="sello">Edith Royero | Financiera</div>
+  <div>ENSIS Security Ltda. — Cotizador interactivo multi-servicio 2026 — Generado: <span id="fechaGen"></span></div>
+</footer>
+
+</div>
+
+<script>
+// =====================================================
+// DATA: tarifarios 2026
+// =====================================================
+const TARIFARIOS = {
+  "enero-junio": { smlv: 1750905, jornada: "44h/sem", modalidades: [
+    {n:"24 HORAS PERMANENTES", v:17106342, f:9.77},
+    {n:"12 HORAS DIURNAS PERMANENTES", v:7659536, f:4.3746},
+    {n:"12 HORAS NOCTURNAS PERMANENTES", v:9446806, f:5.3954},
+    {n:"7 HORAS DIURNAS PERMANENTES", v:4468062, f:2.5519},
+    {n:"8 HORAS DIURNAS PERMANENTES", v:5106357, f:2.9164},
+    {n:"9 HORAS NOCTURNAS PERMANENTES", v:7531922, f:4.3017},
+    {n:"24 HORAS DE LUNES A VIERNES SIN FESTIVOS", v:11404228, f:6.5133},
+    {n:"12 HORAS DIURNAS DE LUNES A VIERNES SIN FESTIVOS", v:5106357, f:2.9164},
+    {n:"12 HORAS NOCTURNAS DE LUNES A VIERNES SIN FESTIVOS", v:6297871, f:3.5969},
+    {n:"7 HORAS DIURNAS DE LUNES A VIERNES SIN FESTIVOS", v:2978708, f:1.7012},
+    {n:"8 HORAS DIURNAS DE LUNES A VIERNES SIN FESTIVOS", v:3404238, f:1.9443},
+    {n:"9 HORAS NOCTURNAS DE LUNES A VIERNES SIN FESTIVOS", v:5021282, f:2.8678},
+    {n:"24 HORAS DE LUNES A VIERNES CON FESTIVOS", v:12544651, f:7.1647},
+    {n:"12 HORAS DIURNAS DE LUNES A VIERNES CON FESTIVOS", v:5616993, f:3.2081},
+    {n:"12 HORAS NOCTURNAS DE LUNES A VIERNES CON FESTIVOS", v:6927658, f:3.9566},
+    {n:"7 HORAS DIURNAS DE LUNES A VIERNES CON FESTIVOS", v:3276579, f:1.8714},
+    {n:"8 HORAS DIURNAS DE LUNES A VIERNES CON FESTIVOS", v:3744662, f:2.1387},
+    {n:"9 HORAS NOCTURNAS DE LUNES A VIERNES CON FESTIVOS", v:5523410, f:3.1546},
+    {n:"24 HORAS DE LUNES A SABADO SIN FESTIVOS", v:13685073, f:7.816},
+    {n:"12 HORAS DIURNAS DE LUNES A SABADO SIN FESTIVOS", v:6127629, f:3.4997},
+    {n:"12 HORAS NOCTURNAS DE LUNES A SABADO SIN FESTIVOS", v:7557445, f:4.3163},
+    {n:"7 HORAS DIURNAS DE LUNES A SABADO SIN FESTIVOS", v:3574450, f:2.0415},
+    {n:"8 HORAS DIURNAS DE LUNES A SABADO SIN FESTIVOS", v:4085086, f:2.3331},
+    {n:"9 HORAS NOCTURNAS DE LUNES A SABADO SIN FESTIVOS", v:6025538, f:3.4414},
+    {n:"24 HORAS DE LUNES A SABADO CON FESTIVOS", v:14825496, f:8.4673},
+    {n:"12 HORAS DIURNAS DE LUNES A SABADO CON FESTIVOS", v:6638264, f:3.7913},
+    {n:"12 HORAS NOCTURNAS DE LUNES A SABADO CON FESTIVOS", v:8187232, f:4.676}
+  ]},
+  "julio-1al14": { smlv: 1750905, jornada: "44h/sem", modalidades: [
+    {n:"24 HORAS PERMANENTES", v:17876740, f:10.21},
+    {n:"12 HORAS DIURNAS PERMANENTES", v:8004489, f:4.5716},
+    {n:"12 HORAS NOCTURNAS PERMANENTES", v:9872251, f:5.6384},
+    {n:"7 HORAS DIURNAS PERMANENTES", v:4669285, f:2.6668},
+    {n:"8 HORAS DIURNAS PERMANENTES", v:5336326, f:3.0478},
+    {n:"9 HORAS NOCTURNAS PERMANENTES", v:7871129, f:4.4955},
+    {n:"24 HORAS DE LUNES A VIERNES SIN FESTIVOS", v:11917827, f:6.8067},
+    {n:"12 HORAS DIURNAS DE LUNES A VIERNES SIN FESTIVOS", v:5336326, f:3.0478},
+    {n:"12 HORAS NOCTURNAS DE LUNES A VIERNES SIN FESTIVOS", v:6581501, f:3.7589},
+    {n:"7 HORAS DIURNAS DE LUNES A VIERNES SIN FESTIVOS", v:3112857, f:1.7779},
+    {n:"8 HORAS DIURNAS DE LUNES A VIERNES SIN FESTIVOS", v:3557551, f:2.0318},
+    {n:"9 HORAS NOCTURNAS DE LUNES A VIERNES SIN FESTIVOS", v:5247419, f:2.997},
+    {n:"24 HORAS DE LUNES A VIERNES CON FESTIVOS", v:13109609, f:7.4873},
+    {n:"12 HORAS DIURNAS DE LUNES A VIERNES CON FESTIVOS", v:5869959, f:3.3525},
+    {n:"12 HORAS NOCTURNAS DE LUNES A VIERNES CON FESTIVOS", v:7239651, f:4.1348},
+    {n:"7 HORAS DIURNAS DE LUNES A VIERNES CON FESTIVOS", v:3424143, f:1.9556},
+    {n:"8 HORAS DIURNAS DE LUNES A VIERNES CON FESTIVOS", v:3913306, f:2.235},
+    {n:"9 HORAS NOCTURNAS DE LUNES A VIERNES CON FESTIVOS", v:5772161, f:3.2967},
+    {n:"24 HORAS DE LUNES A SABADO SIN FESTIVOS", v:14301392, f:8.168},
+    {n:"12 HORAS DIURNAS DE LUNES A SABADO SIN FESTIVOS", v:6403591, f:3.6573},
+    {n:"12 HORAS NOCTURNAS DE LUNES A SABADO SIN FESTIVOS", v:7897801, f:4.5107},
+    {n:"7 HORAS DIURNAS DE LUNES A SABADO SIN FESTIVOS", v:3735428, f:2.1334},
+    {n:"8 HORAS DIURNAS DE LUNES A SABADO SIN FESTIVOS", v:4269061, f:2.4382},
+    {n:"9 HORAS NOCTURNAS DE LUNES A SABADO SIN FESTIVOS", v:6296903, f:3.5964},
+    {n:"24 HORAS DE LUNES A SABADO CON FESTIVOS", v:15493175, f:8.8487},
+    {n:"12 HORAS DIURNAS DE LUNES A SABADO CON FESTIVOS", v:6937224, f:3.9621},
+    {n:"12 HORAS NOCTURNAS DE LUNES A SABADO CON FESTIVOS", v:8555951, f:4.8866}
+  ]},
+  "julio15-diciembre": { smlv: 1750905, jornada: "42h/sem", modalidades: [
+    {n:"24 HORAS PERMANENTES", v:17876740, f:10.21},
+    {n:"12 HORAS DIURNAS PERMANENTES", v:8004489, f:4.5716},
+    {n:"12 HORAS NOCTURNAS PERMANENTES", v:9872251, f:5.6384},
+    {n:"7 HORAS DIURNAS PERMANENTES", v:4669285, f:2.6668},
+    {n:"8 HORAS DIURNAS PERMANENTES", v:5336326, f:3.0478},
+    {n:"9 HORAS NOCTURNAS PERMANENTES", v:7871129, f:4.4955},
+    {n:"24 HORAS DE LUNES A VIERNES SIN FESTIVOS", v:11917827, f:6.8067},
+    {n:"12 HORAS DIURNAS DE LUNES A VIERNES SIN FESTIVOS", v:5336326, f:3.0478},
+    {n:"12 HORAS NOCTURNAS DE LUNES A VIERNES SIN FESTIVOS", v:6581501, f:3.7589},
+    {n:"7 HORAS DIURNAS DE LUNES A VIERNES SIN FESTIVOS", v:3112857, f:1.7779},
+    {n:"8 HORAS DIURNAS DE LUNES A VIERNES SIN FESTIVOS", v:3557551, f:2.0318},
+    {n:"9 HORAS NOCTURNAS DE LUNES A VIERNES SIN FESTIVOS", v:5247419, f:2.997},
+    {n:"24 HORAS DE LUNES A VIERNES CON FESTIVOS", v:13109609, f:7.4873},
+    {n:"12 HORAS DIURNAS DE LUNES A VIERNES CON FESTIVOS", v:5869959, f:3.3525},
+    {n:"12 HORAS NOCTURNAS DE LUNES A VIERNES CON FESTIVOS", v:7239651, f:4.1348},
+    {n:"7 HORAS DIURNAS DE LUNES A VIERNES CON FESTIVOS", v:3424143, f:1.9556},
+    {n:"8 HORAS DIURNAS DE LUNES A VIERNES CON FESTIVOS", v:3913306, f:2.235},
+    {n:"9 HORAS NOCTURNAS DE LUNES A VIERNES CON FESTIVOS", v:5772161, f:3.2967},
+    {n:"24 HORAS DE LUNES A SABADO SIN FESTIVOS", v:14301392, f:8.168},
+    {n:"12 HORAS DIURNAS DE LUNES A SABADO SIN FESTIVOS", v:6403591, f:3.6573},
+    {n:"12 HORAS NOCTURNAS DE LUNES A SABADO SIN FESTIVOS", v:7897801, f:4.5107},
+    {n:"7 HORAS DIURNAS DE LUNES A SABADO SIN FESTIVOS", v:3735428, f:2.1334},
+    {n:"8 HORAS DIURNAS DE LUNES A SABADO SIN FESTIVOS", v:4269061, f:2.4382},
+    {n:"9 HORAS NOCTURNAS DE LUNES A SABADO SIN FESTIVOS", v:6296903, f:3.5964},
+    {n:"24 HORAS DE LUNES A SABADO CON FESTIVOS", v:15493175, f:8.8487},
+    {n:"12 HORAS DIURNAS DE LUNES A SABADO CON FESTIVOS", v:6937224, f:3.9621},
+    {n:"12 HORAS NOCTURNAS DE LUNES A SABADO CON FESTIVOS", v:8555951, f:4.8866}
+  ]}
+};
+
+const CONCEPTOS_NOMINA = [
+  { c:"Sueldo básico (SMMLV 2026)", v: 1750905 },
+  { c:"Auxilio de transporte", v: 249095 },
+  { c:"Recargo nocturno 35%", v: 145000 },
+  { c:"Dominicales 80% (Ley 2466/2025)", v: 118000 },
+  { c:"Horas extras diurnas 25%", v: 25000 },
+  { c:"Horas extras nocturnas 75%", v: 21279 },
+  { c:"Cesantías 8,33%", v: 271858 },
+  { c:"Intereses cesantías 1%", v: 32602 },
+  { c:"Prima de servicios 8,33%", v: 271858 },
+  { c:"Vacaciones 4,17%", v: 135868 },
+  { c:"Pensión 12% empleador", v: 210109 },
+  { c:"ARL Clase IV 4,35%", v: 76164 },
+  { c:"Caja compensación 4%", v: 80000 },
+  { c:"Salud (exonerado Ley 1819/2016)", v: 0 },
+  { c:"ICBF (exonerado Ley 1819/2016)", v: 0 },
+  { c:"SENA (exonerado Ley 1819/2016)", v: 0 }
+];
+
+const OTROS_COSTOS_OP = [
+  { c:"Exámenes Médicos Ingreso", v:79180, cantPorVig: true, anual: true },
+  { c:"Exámenes De Retiro", v:10700, cantPorVig: true, anual: true },
+  { c:"Uniformes 3 Por Año", v:269700, cantPorVig: true, anual: true },
+  { c:"Botas 1 Por Año", v:68480, cantPorVig: true, anual: true },
+  { c:"Reata", v:18725, cantPorVig: true, anual: true },
+  { c:"Gorra", v:12840, cantPorVig: true, anual: true },
+  { c:"Gafas", v:8132, cantPorVig: true, anual: true },
+  { c:"Guantes", v:4494, cantPorVig: true, anual: true },
+  { c:"Psicóloga", v:52500, cantPorVig: true, anual: true },
+  { c:"Comunicación (radio puesto)", v:122000, cantPorVig: false, anual: false },
+  { c:"Seguro de vida", v:3670.20, cantPorVig: true, anual: false },
+  { c:"Póliza RCC", v:0, cantPorVig: false, anual: false }
+];
+
+// =====================================================
+// STATE: lista de servicios cotizados
+// =====================================================
+let servicios = [];
+
+function nuevoServicio() {
+  return {
+    id: Date.now() + Math.random(),
+    modalidad: "0",
+    sector: "comercial",
+    armamento: "sin",
+    puestos: 1,
+    vigilantes: 4,
+    custom: {
+      nombre: "SERVICIO 12 HORAS NOCTURNAS PERMANENTES",
+      horasD: 0,
+      horasN: 12,
+      dias: 30,
+      jornadaD: 15,
+      jornadaN: 9,
+      pctD: 55.97,
+      pctN: 44.03
+    },
+    adicionales: {
+      cantDiurnos: 0,
+      vrDiurno: 80000,
+      cantNocturnos: 0,
+      vrNocturno: 100000,
+      diasMes: 20
+    }
+  };
+}
+
+// Estado para cantidades editables de Otros Costos (Bloque D)
+let cantidadesOC = {};
+// Estado para valores unitarios editables de Otros Costos (Bloque D)
+let valoresOC = {};
+
+// =====================================================
+// HELPERS
+// =====================================================
+const fmt = (n) => "$" + Math.round(n).toLocaleString('es-CO');
+const fmtPct = (p) => (p * 100).toFixed(2) + "%";
+
+// Obtener meses equivalentes del contrato según unidad seleccionada
+function obtenerMesesEfectivos() {
+  const unidad = document.getElementById('unidadDuracion').value;
+  const cantidad = parseFloat(document.getElementById('cantidadDuracion').value) || 0;
+  return unidad === 'dias' ? (cantidad / 30) : cantidad;
+}
+
+function obtenerDiasEfectivos() {
+  const unidad = document.getElementById('unidadDuracion').value;
+  const cantidad = parseFloat(document.getElementById('cantidadDuracion').value) || 0;
+  return unidad === 'dias' ? cantidad : (cantidad * 30);
+}
+
+// Actualiza el label, default y equivalencia cuando cambia la unidad
+function onCambioUnidadDuracion() {
+  const unidad = document.getElementById('unidadDuracion').value;
+  const lbl = document.getElementById('lblCantidadDuracion');
+  const input = document.getElementById('cantidadDuracion');
+  const nota = document.getElementById('notaDuracion');
+
+  if (unidad === 'dias') {
+    lbl.textContent = 'Días del contrato';
+    nota.textContent = 'Útil para eventos, contratos cortos o periodos específicos';
+    if (parseFloat(input.value) < 1) input.value = 167;
+    input.step = 1;
+    input.min = 1;
+  } else {
+    lbl.textContent = 'Meses del contrato';
+    nota.textContent = 'Default 5,57 meses (15-jul a 31-dic)';
+    if (parseFloat(input.value) > 60) input.value = 5.57;
+    input.step = 0.01;
+    input.min = 0.01;
+  }
+  actualizarEquivalencia();
+}
+
+function actualizarEquivalencia() {
+  const unidad = document.getElementById('unidadDuracion').value;
+  const cantidad = parseFloat(document.getElementById('cantidadDuracion').value) || 0;
+  const eqDiv = document.getElementById('equivalenciaDuracion');
+  if (unidad === 'meses') {
+    const dias = Math.round(cantidad * 30);
+    eqDiv.innerHTML = cantidad.toFixed(2).replace(/\.?0+$/, '') + ' meses ≈ ' + dias + ' días';
+  } else {
+    const meses = (cantidad / 30).toFixed(2);
+    eqDiv.innerHTML = cantidad + ' días ≈ ' + meses + ' meses';
+  }
+}
+
+function generarNombreServicio(horasD, horasN, dias) {
+  const hD = parseFloat(horasD) || 0;
+  const hN = parseFloat(horasN) || 0;
+  let descHoras;
+  if (hD > 0 && hN > 0) descHoras = "SERVICIO " + hD + " HORAS DIURNAS + " + hN + " HORAS NOCTURNAS";
+  else if (hN > 0) descHoras = "SERVICIO " + hN + " HORAS NOCTURNAS";
+  else if (hD > 0) descHoras = "SERVICIO " + hD + " HORAS DIURNAS";
+  else descHoras = "SERVICIO SIN HORAS DEFINIDAS";
+
+  const d = parseFloat(dias) || 30;
+  let per;
+  if (Math.abs(d - 30) < 0.5) per = "PERMANENTES";
+  else if (Math.abs(d - 22) < 0.5) per = "DE LUNES A VIERNES SIN FESTIVOS";
+  else if (Math.abs(d - 24) < 0.5) per = "DE LUNES A VIERNES CON FESTIVOS";
+  else if (Math.abs(d - 26) < 0.5) per = "DE LUNES A SABADO SIN FESTIVOS";
+  else if (Math.abs(d - 28) < 0.5) per = "DE LUNES A SABADO CON FESTIVOS";
+  else per = "(" + d + " DIAS/MES)";
+  return descHoras + " " + per;
+}
+
+function sugerirVigilantes(nombreMod) {
+  const n = nombreMod;
+  if (n.startsWith("24 HORAS PERMANENTES")) return 4;
+  if (n.startsWith("24 HORAS DE LUNES A VIERNES SIN")) return 3;
+  if (n.startsWith("24 HORAS DE LUNES A VIERNES CON")) return 3.5;
+  if (n.startsWith("24 HORAS DE LUNES A SABADO SIN")) return 3.5;
+  if (n.startsWith("24 HORAS DE LUNES A SABADO CON")) return 4;
+  if (n.startsWith("12 HORAS")) return 2;
+  if (n.startsWith("9 HORAS NOCTURNAS PERMANENTES")) return 1.5;
+  if (n.startsWith("9 HORAS NOCTURNAS")) return 1;
+  if (n.startsWith("8 HORAS") || n.startsWith("7 HORAS")) return 1;
+  return 2;
+}
+
+function sugerirVigilantesCustom(hD, hN) {
+  const total = (parseFloat(hD)||0) + (parseFloat(hN)||0);
+  if (total >= 24) return 4;
+  if (total >= 12) return 2;
+  if (total >= 9) return 1.5;
+  return 1;
+}
+
+// =====================================================
+// RENDER LISTA DE SERVICIOS
+// =====================================================
+function renderServicios() {
+  const periodo = document.getElementById('periodo').value;
+  const tarif = TARIFARIOS[periodo];
+  const container = document.getElementById('listaServicios');
+  container.innerHTML = '';
+
+  servicios.forEach((s, idx) => {
+    const card = document.createElement('div');
+    card.className = 'servicio-card';
+    card.dataset.id = s.id;
+
+    // Header con título y botones
+    const optionsHtml = tarif.modalidades.map((m, i) =>
+      `<option value="${i}" ${String(s.modalidad)===String(i)?'selected':''}>${m.n} (factor ${m.f})</option>`
+    ).join('') + `<option value="personalizado" ${s.modalidad==="personalizado"?'selected':''} style="font-weight:bold;background:#fff8d6;">⚙ PERSONALIZADO — horas/días no estándar</option>`;
+
+    const customPanelHtml = s.modalidad === "personalizado" ? `
+      <div class="panel-personalizado">
+        <h4>⚙ Configuración personalizada — Motor cotizador</h4>
+        <div class="grid">
+          <div>
+            <label>Nombre del servicio (auto-generado, editable)</label>
+            <input type="text" data-field="custom.nombre" value="${escHtml(s.custom.nombre)}">
+          </div>
+          <div>
+            <label>Horas DIURNAS (06-21h)</label>
+            <input type="number" data-field="custom.horasD" value="${s.custom.horasD}" min="0" max="24" step="0.5" class="editable">
+          </div>
+          <div>
+            <label>Horas NOCTURNAS (21-06h)</label>
+            <input type="number" data-field="custom.horasN" value="${s.custom.horasN}" min="0" max="24" step="0.5" class="editable">
+          </div>
+          <div>
+            <label>Días al mes</label>
+            <input type="number" data-field="custom.dias" value="${s.custom.dias}" min="1" max="31" step="0.5" class="editable">
+            <div class="nota">30=perm, 22=L-V s/f, 24=L-V c/f, 26=L-S s/f, 28=L-S c/f</div>
+          </div>
+          <div>
+            <label>Jornada DIURNA (h)</label>
+            <input type="number" data-field="custom.jornadaD" value="${s.custom.jornadaD}" min="1" max="24" step="0.01">
+          </div>
+          <div>
+            <label>Jornada NOCTURNA (h)</label>
+            <input type="number" data-field="custom.jornadaN" value="${s.custom.jornadaN}" min="1" max="24" step="0.01">
+          </div>
+          <div>
+            <label>% Turno Diurno</label>
+            <div class="input-row"><input type="number" data-field="custom.pctD" value="${s.custom.pctD}" min="0" max="100" step="0.01"><span>%</span></div>
+          </div>
+          <div>
+            <label>% Turno Nocturno</label>
+            <div class="input-row"><input type="number" data-field="custom.pctN" value="${s.custom.pctN}" min="0" max="100" step="0.01"><span>%</span></div>
+          </div>
+        </div>
+        <div data-rol="detalle-calculo" style="margin-top:10px; padding:8px; background:#fff; border-radius:4px; font-family:monospace; font-size:11px; line-height:1.5;"></div>
+      </div>
+    ` : '';
+
+    // Garantizar que adicionales existe (compatibilidad con datos antiguos)
+    if (!s.adicionales) s.adicionales = { cantDiurnos: 0, vrDiurno: 80000, cantNocturnos: 0, vrNocturno: 100000, diasMes: 20 };
+    if (s.adicionales.diasMes === undefined || s.adicionales.diasMes === null) s.adicionales.diasMes = 20;
+
+    const diasMesAdic = s.adicionales.diasMes || 0;
+    const totalAdicionalDiurno = (s.adicionales.cantDiurnos || 0) * diasMesAdic * (s.adicionales.vrDiurno || 0);
+    const totalAdicionalNocturno = (s.adicionales.cantNocturnos || 0) * diasMesAdic * (s.adicionales.vrNocturno || 0);
+    const totalAdicionales = totalAdicionalDiurno + totalAdicionalNocturno;
+
+    const panelAdicionalesHtml = `
+      <div style="margin-top:12px; padding:12px; background:#e8f5ff; border-radius:6px; border:2px dashed #1a3a5c;">
+        <h4 style="margin:0 0 8px 0; color:#1a3a5c; font-size:13px;">➕ Adicionales — guardia extra por turno (COSTO de nómina, no se factura aparte al cliente)</h4>
+        <div style="margin-bottom:10px; padding:8px; background:#fff8d6; border-radius:4px; font-size:12px;">
+          <strong>Fórmula:</strong> Costo adicional = Cantidad guardias × Días a trabajar en el mes × Vr / turno
+        </div>
+        <div class="grid" style="grid-template-columns: 1fr 1fr 1fr 1fr 1fr; gap:10px;">
+          <div>
+            <label style="font-size:12px;">Guardias DIURNOS</label>
+            <input type="number" data-field="adicionales.cantDiurnos" value="${s.adicionales.cantDiurnos}" min="0" step="1">
+          </div>
+          <div>
+            <label style="font-size:12px;">Vr / turno diurno</label>
+            <input type="number" data-field="adicionales.vrDiurno" value="${s.adicionales.vrDiurno}" min="0" step="1000" class="editable">
+          </div>
+          <div>
+            <label style="font-size:12px; color:#b8860b;">📅 Días a trabajar/mes</label>
+            <input type="number" data-field="adicionales.diasMes" value="${s.adicionales.diasMes}" min="0" max="31" step="1" class="editable" style="background:#fff8d6; font-weight:bold;">
+            <div class="nota" style="font-size:10px;">Aplica a diurnos y nocturnos</div>
+          </div>
+          <div>
+            <label style="font-size:12px;">Guardias NOCTURNOS</label>
+            <input type="number" data-field="adicionales.cantNocturnos" value="${s.adicionales.cantNocturnos}" min="0" step="1">
+          </div>
+          <div>
+            <label style="font-size:12px;">Vr / turno nocturno</label>
+            <input type="number" data-field="adicionales.vrNocturno" value="${s.adicionales.vrNocturno}" min="0" step="1000" class="editable">
+          </div>
+        </div>
+        <div style="margin-top:8px; font-size:13px; color:#1a3a5c;">
+          Subtotal diurnos: <strong data-rol="adic-subd">${s.adicionales.cantDiurnos}×${diasMesAdic}×${fmt(s.adicionales.vrDiurno)} = ${fmt(totalAdicionalDiurno)}</strong> &nbsp;|&nbsp;
+          Subtotal nocturnos: <strong data-rol="adic-subn">${s.adicionales.cantNocturnos}×${diasMesAdic}×${fmt(s.adicionales.vrNocturno)} = ${fmt(totalAdicionalNocturno)}</strong> &nbsp;|&nbsp;
+          <span data-rol="adic-total" style="background:#1a3a5c; color:#fff; padding:2px 8px; border-radius:10px;">COSTO adicional MOD: ${fmt(totalAdicionales)}</span>
+        </div>
+      </div>
+    `;
+
+    card.innerHTML = `
+      <div class="servicio-header">
+        <div>
+          <span class="servicio-badge">Servicio #${idx + 1}</span>
+          <span class="servicio-titulo" data-rol="titulo" style="margin-left:10px;">—</span>
+        </div>
+        <div class="acciones-servicio">
+          ${idx > 0 ? `<button onclick="moverServicio('${s.id}',-1)" title="Subir">▲</button>` : ''}
+          ${idx < servicios.length-1 ? `<button onclick="moverServicio('${s.id}',1)" title="Bajar">▼</button>` : ''}
+          ${servicios.length > 1 ? `<button class="peligro" onclick="eliminarServicio('${s.id}')">🗑 Eliminar</button>` : ''}
+        </div>
+      </div>
+      <div class="grid">
+        <div>
+          <label>Modalidad del servicio</label>
+          <select data-field="modalidad">${optionsHtml}</select>
+        </div>
+        <div>
+          <label>Sector</label>
+          <select data-field="sector">
+            <option value="comercial" ${s.sector==='comercial'?'selected':''}>Comercial</option>
+            <option value="residencial" ${s.sector==='residencial'?'selected':''}>Residencial (×0.92 aprox)</option>
+          </select>
+        </div>
+        <div>
+          <label>Armamento</label>
+          <select data-field="armamento">
+            <option value="sin" ${s.armamento==='sin'?'selected':''}>Sin armas (AyS 8%)</option>
+            <option value="con" ${s.armamento==='con'?'selected':''}>Con armas (AyS 10%)</option>
+          </select>
+        </div>
+        <div>
+          <label>Cantidad de puestos</label>
+          <input type="number" data-field="puestos" value="${s.puestos}" min="1" step="1">
+        </div>
+        <div>
+          <label>Vigilantes por puesto</label>
+          <input type="number" data-field="vigilantes" value="${s.vigilantes}" min="0.5" step="0.5" class="editable">
+          <div class="nota">Sugerido auto-editable</div>
+        </div>
+      </div>
+      ${customPanelHtml}
+      ${panelAdicionalesHtml}
+    `;
+    container.appendChild(card);
+
+    // Adjuntar listeners a los inputs y selects de la card
+    card.querySelectorAll('[data-field]').forEach(el => {
+      el.addEventListener('input', (e) => onServicioChange(s.id, e.target));
+      el.addEventListener('change', (e) => onServicioChange(s.id, e.target));
+    });
+  });
+
+  recalcular();
+}
+
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// Actualiza solo los subtotales de adicionales en la tarjeta del servicio (sin re-render)
+function actualizarSubtotalAdicional(serviceId) {
+  const s = servicios.find(x => x.id == serviceId);
+  if (!s || !s.adicionales) return;
+  const card = document.querySelector(`.servicio-card[data-id="${serviceId}"]`);
+  if (!card) return;
+  const diasMesAdic = s.adicionales.diasMes || 0;
+  const subD = (s.adicionales.cantDiurnos || 0) * diasMesAdic * (s.adicionales.vrDiurno || 0);
+  const subN = (s.adicionales.cantNocturnos || 0) * diasMesAdic * (s.adicionales.vrNocturno || 0);
+  const total = subD + subN;
+  const elSubD = card.querySelector('[data-rol="adic-subd"]');
+  const elSubN = card.querySelector('[data-rol="adic-subn"]');
+  const elTotal = card.querySelector('[data-rol="adic-total"]');
+  if (elSubD) elSubD.textContent = `${s.adicionales.cantDiurnos || 0}×${diasMesAdic}×${fmt(s.adicionales.vrDiurno || 0)} = ${fmt(subD)}`;
+  if (elSubN) elSubN.textContent = `${s.adicionales.cantNocturnos || 0}×${diasMesAdic}×${fmt(s.adicionales.vrNocturno || 0)} = ${fmt(subN)}`;
+  if (elTotal) elTotal.textContent = `COSTO adicional MOD: ${fmt(total)}`;
+}
+
+function onServicioChange(id, target) {
+  const s = servicios.find(x => x.id == id);
+  if (!s) return;
+  setTimeout(guardarEstado, 0); // disparar guardado tras este cambio
+  const field = target.dataset.field;
+  let val = target.type === 'number' ? (parseFloat(target.value) || 0) : target.value;
+
+  if (field.startsWith('adicionales.')) {
+    const key = field.split('.')[1];
+    if (!s.adicionales) s.adicionales = { cantDiurnos: 0, vrDiurno: 80000, cantNocturnos: 0, vrNocturno: 100000, diasMes: 20 };
+    s.adicionales[key] = val;
+    // Auto-llenar días a 20 cuando hay guardias > 0 pero días sigue en 0
+    if ((key === 'cantDiurnos' || key === 'cantNocturnos') && val > 0 && (!s.adicionales.diasMes || s.adicionales.diasMes === 0)) {
+      s.adicionales.diasMes = 20;
+      // Actualizar el campo en el DOM sin re-render para no perder focus
+      const card = document.querySelector(`.servicio-card[data-id="${s.id}"]`);
+      if (card) {
+        const inputDias = card.querySelector('[data-field="adicionales.diasMes"]');
+        if (inputDias) inputDias.value = 20;
+      }
+    }
+    // Actualizar solo los subtotales en place (NO re-renderizar para no perder foco del input)
+    actualizarSubtotalAdicional(s.id);
+    recalcular();
+    return;
+  }
+
+  if (field.startsWith('custom.')) {
+    const key = field.split('.')[1];
+    s.custom[key] = val;
+    // Auto-actualizar nombre si cambian horas o días
+    if (['horasD','horasN','dias'].includes(key)) {
+      s.custom.nombre = generarNombreServicio(s.custom.horasD, s.custom.horasN, s.custom.dias);
+      const inputNombre = document.querySelector(`.servicio-card[data-id="${id}"] [data-field="custom.nombre"]`);
+      if (inputNombre) inputNombre.value = s.custom.nombre;
+    }
+    // Sugerir vigilantes si cambian horas
+    if (['horasD','horasN'].includes(key)) {
+      s.vigilantes = sugerirVigilantesCustom(s.custom.horasD, s.custom.horasN);
+      const inputVig = document.querySelector(`.servicio-card[data-id="${id}"] [data-field="vigilantes"]`);
+      if (inputVig) inputVig.value = s.vigilantes;
+    }
+  } else {
+    s[field] = val;
+    // Si cambió modalidad, ajustar vigilantes y mostrar/ocultar panel custom
+    if (field === 'modalidad') {
+      if (val === 'personalizado') {
+        s.vigilantes = sugerirVigilantesCustom(s.custom.horasD, s.custom.horasN);
+        s.custom.nombre = generarNombreServicio(s.custom.horasD, s.custom.horasN, s.custom.dias);
+      } else {
+        const periodo = document.getElementById('periodo').value;
+        const mod = TARIFARIOS[periodo].modalidades[parseInt(val)];
+        s.vigilantes = sugerirVigilantes(mod.n);
+      }
+      renderServicios(); // re-render para mostrar/ocultar panel custom
+      return;
+    }
+  }
+  recalcular();
+}
+
+function agregarServicio() {
+  servicios.push(nuevoServicio());
+  renderServicios();
+  guardarEstado();
+}
+
+function duplicarUltimoServicio() {
+  if (servicios.length === 0) { agregarServicio(); return; }
+  const ult = servicios[servicios.length - 1];
+  const copia = JSON.parse(JSON.stringify(ult));
+  copia.id = Date.now() + Math.random();
+  servicios.push(copia);
+  renderServicios();
+  guardarEstado();
+}
+
+function eliminarServicio(id) {
+  if (servicios.length <= 1) { alert('Debe quedar al menos un servicio'); return; }
+  servicios = servicios.filter(s => s.id != id);
+  renderServicios();
+  guardarEstado();
+}
+
+function moverServicio(id, dir) {
+  const idx = servicios.findIndex(s => s.id == id);
+  const nuevoIdx = idx + dir;
+  if (nuevoIdx < 0 || nuevoIdx >= servicios.length) return;
+  [servicios[idx], servicios[nuevoIdx]] = [servicios[nuevoIdx], servicios[idx]];
+  renderServicios();
+  guardarEstado();
+}
+
+// =====================================================
+// CÁLCULO POR SERVICIO
+// =====================================================
+function calcularServicio(s, periodo, pctIVA) {
+  const tarif = TARIFARIOS[periodo];
+  let mod;
+
+  if (s.modalidad === "personalizado") {
+    // Método correcto: derivar costo-hora de las tarifas 12h permanentes del tarifario
+    // (Garantiza consistencia: 12h D + 12h N = 24h permanentes del tarifario)
+    const smlv = tarif.smlv;
+    const c = s.custom;
+    const tarifa12hD = tarif.modalidades.find(m => m.n === "12 HORAS DIURNAS PERMANENTES")?.v || 0;
+    const tarifa12hN = tarif.modalidades.find(m => m.n === "12 HORAS NOCTURNAS PERMANENTES")?.v || 0;
+    const costoHoraD = tarifa12hD / 30 / 12;
+    const costoHoraN = tarifa12hN / 30 / 12;
+    const vrD = (c.horasD > 0) ? (costoHoraD * c.horasD * c.dias) : 0;
+    const vrN = (c.horasN > 0) ? (costoHoraN * c.horasN * c.dias) : 0;
+    const vrTotal = vrD + vrN;
+    const factorEq = (smlv > 0) ? (vrTotal / smlv) : 0;
+    mod = { n: c.nombre || generarNombreServicio(c.horasD, c.horasN, c.dias), v: vrTotal, f: factorEq.toFixed(4), detalle: { vrD, vrN, smlv, costoHoraD, costoHoraN, tarifa12hD, tarifa12hN, c } };
+  } else {
+    const idx = parseInt(s.modalidad);
+    mod = { ...tarif.modalidades[idx] };
+  }
+
+  const factorSector = (s.sector === 'residencial') ? 0.92 : 1.0;
+  const valorBase = mod.v * factorSector;
+  const pctAyS = (s.armamento === 'con') ? 0.10 : 0.08;
+  const vrAyS = valorBase * pctAyS;
+  const vrSinIVA = valorBase + vrAyS;
+  const aiu = vrSinIVA * 0.10;
+  const ivaMonto = aiu * pctIVA;
+  const totalConIVA = vrSinIVA + ivaMonto;
+  const vrParcial = vrSinIVA * s.puestos;
+  const totalParcialConIVA = totalConIVA * s.puestos;
+  const ivaTotal = ivaMonto * s.puestos;
+
+  // Adicionales — son COSTO de nómina (no ingreso al cliente)
+  if (!s.adicionales) s.adicionales = { cantDiurnos: 0, vrDiurno: 80000, cantNocturnos: 0, vrNocturno: 100000, diasMes: 20 };
+  if (s.adicionales.diasMes === undefined || s.adicionales.diasMes === null) s.adicionales.diasMes = 20;
+  const diasMesAdic = s.adicionales.diasMes || 0;
+  const totalAdicionalDiurno = (s.adicionales.cantDiurnos || 0) * diasMesAdic * (s.adicionales.vrDiurno || 0);
+  const totalAdicionalNocturno = (s.adicionales.cantNocturnos || 0) * diasMesAdic * (s.adicionales.vrNocturno || 0);
+  const totalAdicionales = totalAdicionalDiurno + totalAdicionalNocturno;
+
+  return {
+    mod, valorBase, vrAyS, vrSinIVA, aiu, ivaMonto, totalConIVA, vrParcial,
+    totalParcialConIVA, // SIN adicionales (no es ingreso al cliente)
+    totalAdicionales,   // COSTO de nómina por turnos adicionales
+    totalAdicionalDiurno,
+    totalAdicionalNocturno,
+    ivaTotal,
+    puestos: s.puestos,
+    vigilantes: s.vigilantes
+  };
+}
+
+// =====================================================
+// RECALCULAR (CONSOLIDA TODOS LOS SERVICIOS)
+// =====================================================
+function recalcular() {
+  const periodo = document.getElementById('periodo').value;
+  const meses = obtenerMesesEfectivos() || 1;
+  const unidadDur = document.getElementById('unidadDuracion').value;
+  const cantidadDur = parseFloat(document.getElementById('cantidadDuracion').value) || 0;
+  const esCotizacionPorDias = (unidadDur === 'dias');
+  const factorContrato = meses; // ya viene calculado correctamente (días/30 o meses)
+  actualizarEquivalencia();
+
+  // Leyenda explicativa
+  const leyenda = document.getElementById('leyendaUnidad');
+  if (esCotizacionPorDias) {
+    leyenda.innerHTML = `💡 Cotización por <strong>${cantidadDur} día(s)</strong>. Los valores del CONTRATO son proporcionales (días÷30). La columna "TOTAL MES (ref)" es solo referencia mensual.`;
+  } else {
+    leyenda.innerHTML = `💡 Cotización por <strong>${cantidadDur} mes(es)</strong>. El TOTAL CONTRATO = TOTAL MES × ${cantidadDur}.`;
+  }
+  const pctReinv = (parseFloat(document.getElementById('pctReinversion').value) || 0) / 100;
+  const pctComOC = (parseFloat(document.getElementById('pctComisionOC').value) || 0) / 100;
+  const pctAdmin = (parseFloat(document.getElementById('pctAdministrativo').value) || 0) / 100;
+  const pctIVA = (parseFloat(document.getElementById('pctIVA').value) || 0) / 100;
+  const pctRenta = (parseFloat(document.getElementById('pctRenta').value) || 0) / 100;
+
+  let totalIngreso = 0, totalSinIVA = 0, totalIVA = 0;
+  let totalPuestos = 0, totalVigilantesEquivalentes = 0;
+  let htmlTabla = '';
+
+  // Calcular cada servicio y poblar tabla
+  servicios.forEach((s, idx) => {
+    const r = calcularServicio(s, periodo, pctIVA);
+
+    // Actualizar título visible en la card
+    const titulo = document.querySelector(`.servicio-card[data-id="${s.id}"] [data-rol="titulo"]`);
+    if (titulo) titulo.textContent = r.mod.n + (s.sector==='residencial'?' [RESIDENCIAL]':'') + (s.armamento==='con'?' [CON ARMAS]':'');
+
+    // Detalle del cálculo personalizado
+    if (s.modalidad === 'personalizado' && r.mod.detalle) {
+      const det = document.querySelector(`.servicio-card[data-id="${s.id}"] [data-rol="detalle-calculo"]`);
+      if (det) {
+        const d = r.mod.detalle;
+        det.innerHTML = `<strong>Motor (basado en tarifario):</strong> Tarifa 12h D = ${fmt(d.tarifa12hD)} | Tarifa 12h N = ${fmt(d.tarifa12hN)}<br>Costo-hora diurna = ${fmt(d.costoHoraD)} &nbsp;|&nbsp; Costo-hora nocturna = ${fmt(d.costoHoraN)}<br>Vr Diurno = ${fmt(d.costoHoraD)} × ${d.c.horasD} × ${d.c.dias} = ${fmt(d.vrD)}<br>Vr Nocturno = ${fmt(d.costoHoraN)} × ${d.c.horasN} × ${d.c.dias} = ${fmt(d.vrN)}<br><strong>Vr Total = ${fmt(r.mod.v)}</strong> &nbsp; (Factor equiv = ${r.mod.f} SMLV)`;
+      }
+    }
+
+    const totalContratoServicio = r.totalParcialConIVA * factorContrato;
+    htmlTabla += `
+      <tr>
+        <td>${idx + 1}</td>
+        <td>${r.mod.n}${s.sector==='residencial'?' [RES]':''}${s.armamento==='con'?' [ARM]':''}</td>
+        <td class="num">${fmt(r.valorBase)}</td>
+        <td class="num">${fmt(r.vrAyS)}</td>
+        <td class="num">${s.puestos}</td>
+        <td class="num" style="color:#888;">${fmt(r.totalParcialConIVA)}</td>
+        <td class="num"><strong style="color:#1a3a5c;">${fmt(totalContratoServicio)}</strong></td>
+      </tr>
+    `;
+
+    totalIngreso += r.totalParcialConIVA;
+    totalSinIVA += r.vrParcial;
+    totalIVA += r.ivaTotal;
+    totalPuestos += s.puestos;
+    totalVigilantesEquivalentes += s.vigilantes * s.puestos;
+  });
+
+  const totalContratoConsolidado = totalIngreso * factorContrato;
+  htmlTabla += `
+    <tr class="total">
+      <td colspan="4">TOTAL CONSOLIDADO (${servicios.length} servicio(s), ${totalPuestos} puesto(s))</td>
+      <td class="num">${totalPuestos}</td>
+      <td class="num">${fmt(totalIngreso)}</td>
+      <td class="num">${fmt(totalContratoConsolidado)}</td>
+    </tr>
+  `;
+  document.getElementById('tablaServicio').innerHTML = htmlTabla;
+
+  // Bloque A: Nómina por servicio + desglose consolidado + adicionales
+  let totalNominaBase = 0;
+  let totalAdicionalesAcum = 0;
+  let htmlNomResumen = '';
+  servicios.forEach((s, idx) => {
+    const r = calcularServicio(s, periodo, pctIVA);
+    const vigPuesto = s.vigilantes;
+    const totalVigs = vigPuesto * s.puestos;
+    const costoNominaServ = CONCEPTOS_NOMINA.reduce((acc, c) => acc + c.v * totalVigs, 0);
+    totalNominaBase += costoNominaServ;
+    totalAdicionalesAcum += r.totalAdicionales;
+    htmlNomResumen += `
+      <tr>
+        <td>#${idx + 1}</td>
+        <td>${r.mod.n}</td>
+        <td class="num">${vigPuesto}</td>
+        <td class="num">${s.puestos}</td>
+        <td class="num">${totalVigs}</td>
+        <td class="num">${fmt(costoNominaServ)}</td>
+      </tr>
+      ${r.totalAdicionales > 0 ? `
+      <tr style="background:#e8f5ff;">
+        <td></td>
+        <td style="padding-left:20px; font-style:italic; color:#1a3a5c;">↳ Turnos adicionales: ${s.adicionales.cantDiurnos}D × ${s.adicionales.diasMes || 0}días × ${fmt(s.adicionales.vrDiurno)} + ${s.adicionales.cantNocturnos}N × ${s.adicionales.diasMes || 0}días × ${fmt(s.adicionales.vrNocturno)}</td>
+        <td class="num" colspan="3" style="font-style:italic; color:#1a3a5c;">${((s.adicionales.cantDiurnos||0) + (s.adicionales.cantNocturnos||0)) * (s.adicionales.diasMes||0)} turno-días</td>
+        <td class="num" style="font-style:italic; color:#1a3a5c;">${fmt(r.totalAdicionales)}</td>
+      </tr>
+      ` : ''}
+    `;
+  });
+  const totalNomina = totalNominaBase + totalAdicionalesAcum;
+  htmlNomResumen += `
+    <tr class="subtotal">
+      <td colspan="5">Subtotal nómina regular</td>
+      <td class="num">${fmt(totalNominaBase)}</td>
+    </tr>
+    ${totalAdicionalesAcum > 0 ? `
+    <tr class="subtotal" style="background:#e8f5ff;">
+      <td colspan="5">Subtotal turnos adicionales (costo de nómina)</td>
+      <td class="num">${fmt(totalAdicionalesAcum)}</td>
+    </tr>
+    ` : ''}
+    <tr class="total">
+      <td colspan="4">TOTAL MOD (Bloque A)</td>
+      <td class="num">${totalVigilantesEquivalentes}</td>
+      <td class="num">${fmt(totalNomina)}</td>
+    </tr>
+  `;
+  document.getElementById('tablaNominaResumen').innerHTML = htmlNomResumen;
+
+  // Desglose nómina consolidado por concepto
+  let htmlNom = '';
+  CONCEPTOS_NOMINA.forEach(c => {
+    htmlNom += `<tr><td>${c.c}</td><td class="num">${fmt(c.v)}</td><td class="num">${totalVigilantesEquivalentes}</td><td class="num">${fmt(c.v * totalVigilantesEquivalentes)}</td></tr>`;
+  });
+  htmlNom += `<tr class="total"><td colspan="3">TOTAL MOD</td><td class="num">${fmt(totalNomina)}</td></tr>`;
+  document.getElementById('tablaNomina').innerHTML = htmlNom;
+
+  // Bloque D: Otros Costos consolidado — Vr Unitario y Cantidad editables
+  let subtotalOp = 0;
+  let htmlOC = '';
+  OTROS_COSTOS_OP.forEach(oc => {
+    const autoCant = oc.cantPorVig ? totalVigilantesEquivalentes : totalPuestos;
+    const cantActual = (cantidadesOC[oc.c] !== undefined && cantidadesOC[oc.c] !== null && cantidadesOC[oc.c] !== '') ? parseFloat(cantidadesOC[oc.c]) : autoCant;
+    const vrActual = (valoresOC[oc.c] !== undefined && valoresOC[oc.c] !== null && valoresOC[oc.c] !== '') ? parseFloat(valoresOC[oc.c]) : oc.v;
+    const mensual = oc.anual ? (vrActual * cantActual / 12) : (vrActual * cantActual);
+    subtotalOp += mensual;
+    const cantOverridden = (cantidadesOC[oc.c] !== undefined && cantidadesOC[oc.c] !== null && cantidadesOC[oc.c] !== '');
+    const vrOverridden = (valoresOC[oc.c] !== undefined && valoresOC[oc.c] !== null && valoresOC[oc.c] !== '');
+    htmlOC += `<tr>
+      <td>${oc.c}${oc.anual?' (anual/12)':''}</td>
+      <td class="num"><input type="number" data-oc-valor="${oc.c}" value="${vrActual}" min="0" step="100" class="editable" style="width:130px; text-align:right;" title="${vrOverridden ? 'Manual (override)' : 'Default: ' + fmt(oc.v)}"></td>
+      <td class="num"><input type="number" data-oc-concepto="${oc.c}" value="${cantActual}" min="0" step="0.5" class="editable" style="width:80px; text-align:right;" title="${cantOverridden ? 'Manual (override)' : 'Auto: ' + autoCant}"></td>
+      <td class="num">${fmt(mensual)}</td>
+    </tr>`;
+  });
+  htmlOC += `<tr class="subtotal"><td colspan="3">Subtotal Operativos</td><td class="num">${fmt(subtotalOp)}</td></tr>`;
+  const comisionOC = totalIngreso * pctComOC;
+  const administrativoOC = totalSinIVA * pctAdmin;
+  htmlOC += `<tr><td>Comisión ${(pctComOC*100).toFixed(2)}% (sobre Total con IVA)</td><td colspan="2"></td><td class="num">${fmt(comisionOC)}</td></tr>`;
+  htmlOC += `<tr><td>Administrativo ${(pctAdmin*100).toFixed(2)}% (sobre Total sin IVA)</td><td colspan="2"></td><td class="num">${fmt(administrativoOC)}</td></tr>`;
+  const totalOC = subtotalOp + comisionOC + administrativoOC;
+  htmlOC += `<tr class="total"><td colspan="3">TOTAL OTROS COSTOS (Bloque D)</td><td class="num">${fmt(totalOC)}</td></tr>`;
+  document.getElementById('tablaOtrosCostos').innerHTML = htmlOC;
+  // Adjuntar listeners a inputs de cantidades y valores editables
+  document.querySelectorAll('#tablaOtrosCostos input[data-oc-concepto]').forEach(input => {
+    input.addEventListener('input', (e) => onCantidadOCChange(e.target.dataset.ocConcepto, e.target.value));
+  });
+  document.querySelectorAll('#tablaOtrosCostos input[data-oc-valor]').forEach(input => {
+    input.addEventListener('input', (e) => onValorOCChange(e.target.dataset.ocValor, e.target.value));
+  });
+
+  // Calcular IVA total y AIU total para mostrar valores calculados
+  const totalAIU = totalSinIVA * 0.10;
+  const totalIVATotal = totalAIU * pctIVA;
+
+  // Reinversión sobre Total SIN IVA
+  const reinversion = totalSinIVA * pctReinv;
+
+  // Costo total y rentabilidad (sin Comisión tarifario)
+  const costoTotal = totalNomina + reinversion + totalOC;
+  const utilidadBruta = totalIngreso - costoTotal;
+  const rentaPagar = utilidadBruta > 0 ? utilidadBruta * pctRenta : 0;
+  const utilidadNeta = utilidadBruta - rentaPagar;
+  const margenNeto = totalIngreso > 0 ? utilidadNeta / totalIngreso : 0;
+
+  const filaRent = (concepto, mensual, esBold, color) => {
+    const pct = totalIngreso > 0 ? (mensual / totalIngreso) : 0;
+    return `<tr ${color ? 'style="background:'+color+';"' : ''}><td ${esBold?'style="font-weight:bold;"':''}>${concepto}</td><td class="num">${fmt(mensual)}</td><td class="num">${fmt(mensual * meses)}</td><td class="num">${fmtPct(pct)}</td></tr>`;
+  };
+  let htmlRent = '';
+  htmlRent += filaRent("INGRESO (Total con IVA)", totalIngreso, true, '#d4edda');
+  htmlRent += filaRent("COSTO TOTAL", costoTotal, true, '#f8f9fa');
+  htmlRent += filaRent("   A. MOD (Nómina " + totalVigilantesEquivalentes + " vigilantes)", totalNomina, false);
+  htmlRent += filaRent("   B. Reinversión (" + (pctReinv*100).toFixed(2) + "% sobre Total SIN IVA)", reinversion, false);
+  htmlRent += filaRent("   C. Otros Costos", totalOC, false);
+  htmlRent += filaRent("UTILIDAD BRUTA", utilidadBruta, true, utilidadBruta < 0 ? '#f8d7da' : '#fff3cd');
+  htmlRent += filaRent("Renta " + (pctRenta*100).toFixed(0) + "%", rentaPagar, false);
+  htmlRent += filaRent("UTILIDAD NETA DESPUÉS DE IMPUESTO", utilidadNeta, true, utilidadNeta < 0 ? '#f8d7da' : '#d4edda');
+  document.getElementById('tablaRentabilidad').innerHTML = htmlRent;
+  document.getElementById('thRentPeriodo').textContent = unidadDur === 'dias'
+    ? `Total ${cantidadDur} días`
+    : `Total ${cantidadDur} meses`;
+
+  // Actualizar valores calculados en el panel de parámetros editables
+  document.getElementById('calcReinversion').textContent = `= ${fmt(reinversion)} (sobre Total sin IVA ${fmt(totalSinIVA)})`;
+  document.getElementById('calcComisionOC').textContent = `= ${fmt(totalIngreso * pctComOC)} (sobre ${fmt(totalIngreso)})`;
+  document.getElementById('calcAdministrativo').textContent = `= ${fmt(totalSinIVA * pctAdmin)} (sobre ${fmt(totalSinIVA)})`;
+  document.getElementById('calcIVA').textContent = `= ${fmt(totalIVATotal)} (sobre AIU ${fmt(totalAIU)})`;
+  document.getElementById('calcRenta').textContent = `= ${fmt(rentaPagar)} (sobre utilidad bruta ${fmt(utilidadBruta)})`;
+
+  // Veredicto
+  const vd = document.getElementById('veredictoAuditor');
+  let vt='', vc='';
+  if (utilidadNeta < 0) { vt='🔴 FALLO — Utilidad neta NEGATIVA. NO entregar al cliente.'; vc='alerta'; }
+  else if (margenNeto < 0.05) { vt='🟠 ALERTA — Margen neto ' + fmtPct(margenNeto) + ' (< 5%). Cotización al límite.'; vc='alerta'; }
+  else if (margenNeto < 0.10) { vt='🟡 ATENCIÓN — Margen neto ' + fmtPct(margenNeto) + ' (5%-10%). Bajo umbral sano.'; vc='atencion'; }
+  else if (margenNeto < 0.20) { vt='🟢 OK — Margen neto ' + fmtPct(margenNeto) + ' (10%-20%). Rentabilidad sana.'; vc='ok'; }
+  else { vt='🟢 OK — Margen neto ' + fmtPct(margenNeto) + ' (>20%). Rentabilidad alta.'; vc='ok'; }
+  vd.textContent = vt; vd.className = 'veredicto ' + vc;
+
+  // Tarjetas resumen
+  const tipoM = margenNeto >= 0.10 ? 'positivo' : 'negativo';
+  const lblIngreso = esCotizacionPorDias ? `Ingreso del contrato (${cantidadDur} días)` : 'Ingreso mensual';
+  const lblCosto = esCotizacionPorDias ? `Costo del contrato (${cantidadDur} días)` : 'Costo total mensual';
+  const lblUtilidad = esCotizacionPorDias ? `Utilidad del contrato (${cantidadDur} días)` : 'Utilidad neta mensual';
+  const valIngresoCard = esCotizacionPorDias ? (totalIngreso * factorContrato) : totalIngreso;
+  const valCostoCard = esCotizacionPorDias ? (costoTotal * factorContrato) : costoTotal;
+  const valUtilidadCard = esCotizacionPorDias ? (utilidadNeta * factorContrato) : utilidadNeta;
+  const lblTotal = esCotizacionPorDias ? `Equivalente mensual (ref)` : `Total periodo (${cantidadDur} meses)`;
+  const valTotalCard = esCotizacionPorDias ? totalIngreso : (totalIngreso * meses);
+
+  document.getElementById('resumenCards').innerHTML = `
+    <div class="card"><div class="label">Tarifario aplicado</div><div class="value" style="font-size:14px;">${periodo.toUpperCase()}<br><span style="font-size:11px;font-weight:normal;">Jornada ${TARIFARIOS[periodo].jornada}</span></div></div>
+    <div class="card"><div class="label">N° de servicios</div><div class="value">${servicios.length}</div></div>
+    <div class="card"><div class="label">Total puestos</div><div class="value">${totalPuestos}</div></div>
+    <div class="card"><div class="label">Total vigilantes</div><div class="value">${totalVigilantesEquivalentes}</div></div>
+    <div class="card positivo"><div class="label">${lblIngreso}</div><div class="value">${fmt(valIngresoCard)}</div></div>
+    <div class="card"><div class="label">${lblCosto}</div><div class="value">${fmt(valCostoCard)}</div></div>
+    <div class="card ${tipoM}"><div class="label">${lblUtilidad}</div><div class="value">${fmt(valUtilidadCard)}</div></div>
+    <div class="card ${tipoM}"><div class="label">Margen neto</div><div class="value">${fmtPct(margenNeto)}</div></div>
+    <div class="card"><div class="label">${lblTotal}</div><div class="value">${fmt(valTotalCard)}</div></div>
+  `;
+}
+
+// =====================================================
+// EXPORT / IMPORT EXCEL (.xlsx) — usa SheetJS por CDN
+// =====================================================
+function loadSheetJS() {
+  return new Promise((resolve, reject) => {
+    if (window.XLSX) return resolve();
+    const script = document.createElement('script');
+    script.src = 'https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js';
+    script.onload = () => resolve();
+    script.onerror = () => reject(new Error('No se pudo cargar la librería Excel. Verifica conexión a internet.'));
+    document.head.appendChild(script);
+  });
+}
+
+async function exportarAExcel() {
+  try {
+    await loadSheetJS();
+    const wb = XLSX.utils.book_new();
+    const periodoActual = document.getElementById('periodo').value;
+    const tarif = TARIFARIOS[periodoActual];
+
+    // ============== Sheet 1: Datos Generales ==============
+    const datosGenerales = [
+      ['INSTRUCCIONES', 'Modifica solo los valores en la columna "Valor". No cambies los nombres de los campos.'],
+      ['Campo', 'Valor'],
+      ['Cliente', document.getElementById('cliente').value],
+      ['Periodo', periodoActual],
+      ['Unidad Duración', document.getElementById('unidadDuracion').value],
+      ['Cantidad Duración', parseFloat(document.getElementById('cantidadDuracion').value) || 0],
+      ['% Reinversión', parseFloat(document.getElementById('pctReinversion').value) || 0],
+      ['% Comisión OC', parseFloat(document.getElementById('pctComisionOC').value) || 0],
+      ['% Administrativo OC', parseFloat(document.getElementById('pctAdministrativo').value) || 0],
+      ['% IVA', parseFloat(document.getElementById('pctIVA').value) || 0],
+      ['% Renta', parseFloat(document.getElementById('pctRenta').value) || 0]
+    ];
+    const wsDG = XLSX.utils.aoa_to_sheet(datosGenerales);
+    wsDG['!cols'] = [{wch: 30}, {wch: 40}];
+    XLSX.utils.book_append_sheet(wb, wsDG, 'Datos Generales');
+
+    // ============== Sheet 2: Servicios (solo con valor cotizado > 0) ==============
+    const pctIVAExp = (parseFloat(document.getElementById('pctIVA').value) || 0) / 100;
+    const headerServ = ['#', 'Modalidad', 'Sector', 'Armamento', 'Puestos', 'Vigilantes/Puesto',
+      'CustomNombre', 'CustomHorasD', 'CustomHorasN', 'CustomDias', 'CustomJornadaD', 'CustomJornadaN', 'CustomPctD', 'CustomPctN',
+      'AdicGuardiasDiurnos', 'AdicVrDiurno', 'AdicGuardiasNocturnos', 'AdicVrNocturno', 'AdicDiasMes',
+      'Vr Servicio (con IVA)'];
+    const dataServ = [headerServ];
+    let idxServ = 0;
+    servicios.forEach((s) => {
+      const rEval = calcularServicio(s, periodoActual, pctIVAExp);
+      if (rEval.totalParcialConIVA <= 0) return; // omitir servicios sin valor cotizado
+      idxServ++;
+      let modNombre;
+      if (s.modalidad === 'personalizado') {
+        modNombre = 'PERSONALIZADO';
+      } else {
+        const m = tarif.modalidades[parseInt(s.modalidad)];
+        modNombre = m ? m.n : 'PERSONALIZADO';
+      }
+      const c = s.custom || {};
+      const adic = s.adicionales || {};
+      dataServ.push([
+        idxServ,
+        modNombre,
+        s.sector || 'comercial',
+        s.armamento || 'sin',
+        s.puestos || 1,
+        s.vigilantes || 4,
+        c.nombre || '',
+        c.horasD || 0,
+        c.horasN || 0,
+        c.dias || 30,
+        c.jornadaD || 15,
+        c.jornadaN || 9,
+        c.pctD || 55.97,
+        c.pctN || 44.03,
+        adic.cantDiurnos || 0,
+        adic.vrDiurno || 80000,
+        adic.cantNocturnos || 0,
+        adic.vrNocturno || 100000,
+        adic.diasMes || 20,
+        rEval.totalParcialConIVA
+      ]);
+    });
+    const wsServ = XLSX.utils.aoa_to_sheet(dataServ);
+    wsServ['!cols'] = headerServ.map(() => ({wch: 18}));
+    XLSX.utils.book_append_sheet(wb, wsServ, 'Servicios');
+
+    // ============== Sheet 3: Otros Costos ==============
+    // Calcular cantidades automáticas para los que no tengan override
+    let totalPuestos = 0, totalVigEq = 0;
+    servicios.forEach(s => {
+      totalPuestos += parseFloat(s.puestos) || 0;
+      totalVigEq += (parseFloat(s.vigilantes) || 0) * (parseFloat(s.puestos) || 0);
+    });
+    const headerOC = ['Concepto', 'Anual_div12', 'Vr Unitario', 'Cantidad', 'Total Mensual Calculado'];
+    const dataOC = [headerOC];
+    OTROS_COSTOS_OP.forEach(oc => {
+      const autoCant = oc.cantPorVig ? totalVigEq : totalPuestos;
+      const vrActual = (valoresOC[oc.c] !== undefined && valoresOC[oc.c] !== null && valoresOC[oc.c] !== '') ? parseFloat(valoresOC[oc.c]) : oc.v;
+      const cantActual = (cantidadesOC[oc.c] !== undefined && cantidadesOC[oc.c] !== null && cantidadesOC[oc.c] !== '') ? parseFloat(cantidadesOC[oc.c]) : autoCant;
+      const total = oc.anual ? (vrActual * cantActual / 12) : (vrActual * cantActual);
+      // Solo incluir conceptos con valor cotizado > 0
+      if (total <= 0) return;
+      dataOC.push([oc.c, oc.anual ? 'Sí' : 'No', vrActual, cantActual, total]);
+    });
+    const wsOC = XLSX.utils.aoa_to_sheet(dataOC);
+    wsOC['!cols'] = [{wch: 35}, {wch: 12}, {wch: 14}, {wch: 12}, {wch: 18}];
+    XLSX.utils.book_append_sheet(wb, wsOC, 'Otros Costos');
+
+    // ============== Sheet 4: Resumen Cálculo (read-only) ==============
+    const pctIVA = (parseFloat(document.getElementById('pctIVA').value) || 0) / 100;
+    const pctReinv = (parseFloat(document.getElementById('pctReinversion').value) || 0) / 100;
+    const pctComOC = (parseFloat(document.getElementById('pctComisionOC').value) || 0) / 100;
+    const pctAdmin = (parseFloat(document.getElementById('pctAdministrativo').value) || 0) / 100;
+    const pctRenta = (parseFloat(document.getElementById('pctRenta').value) || 0) / 100;
+    const meses = obtenerMesesEfectivos() || 1;
+
+    let totalIngreso = 0, totalSinIVA = 0, totalAdicionalesAcum = 0;
+    servicios.forEach(s => {
+      const r = calcularServicio(s, periodoActual, pctIVA);
+      totalIngreso += r.totalParcialConIVA;
+      totalSinIVA += r.vrParcial;
+      totalAdicionalesAcum += r.totalAdicionales;
+    });
+    const totalNominaBase = servicios.reduce((acc, s) => {
+      const tv = (parseFloat(s.vigilantes) || 0) * (parseFloat(s.puestos) || 0);
+      return acc + CONCEPTOS_NOMINA.reduce((a, c) => a + c.v * tv, 0);
+    }, 0);
+    const totalMOD = totalNominaBase + totalAdicionalesAcum;
+    const reinversion = totalSinIVA * pctReinv;
+    let subtotalOpOC = 0;
+    OTROS_COSTOS_OP.forEach(oc => {
+      const autoCant = oc.cantPorVig ? totalVigEq : totalPuestos;
+      const vrA = (valoresOC[oc.c] !== undefined && valoresOC[oc.c] !== '') ? parseFloat(valoresOC[oc.c]) : oc.v;
+      const cantA = (cantidadesOC[oc.c] !== undefined && cantidadesOC[oc.c] !== '') ? parseFloat(cantidadesOC[oc.c]) : autoCant;
+      subtotalOpOC += oc.anual ? (vrA * cantA / 12) : (vrA * cantA);
+    });
+    const totalOC = subtotalOpOC + (totalIngreso * pctComOC) + (totalSinIVA * pctAdmin);
+    const costoTotal = totalMOD + reinversion + totalOC;
+    const utilidadBruta = totalIngreso - costoTotal;
+    const renta = utilidadBruta > 0 ? utilidadBruta * pctRenta : 0;
+    const utilidadNeta = utilidadBruta - renta;
+    const margenNeto = totalIngreso > 0 ? (utilidadNeta / totalIngreso) * 100 : 0;
+
+    const dataResumen = [
+      ['RESUMEN DE CÁLCULO (READ-ONLY - se recalcula al importar)'],
+      [],
+      ['Concepto', 'Mensual', 'Total Contrato'],
+      ['INGRESO (Total con IVA)', totalIngreso, totalIngreso * meses],
+      ['Costo Total', costoTotal, costoTotal * meses],
+      ['  A. MOD (Nómina + Adicionales)', totalMOD, totalMOD * meses],
+      ['  B. Reinversión', reinversion, reinversion * meses],
+      ['  C. Otros Costos', totalOC, totalOC * meses],
+      ['Utilidad Bruta', utilidadBruta, utilidadBruta * meses],
+      ['Renta', renta, renta * meses],
+      ['Utilidad Neta', utilidadNeta, utilidadNeta * meses],
+      [],
+      ['% Margen Neto', margenNeto.toFixed(2) + '%'],
+      ['Veredicto', margenNeto < 5 ? 'ALERTA' : (margenNeto < 10 ? 'ATENCIÓN' : 'OK')],
+      [],
+      ['Fecha generación', new Date().toLocaleString('es-CO')]
+    ];
+    const wsR = XLSX.utils.aoa_to_sheet(dataResumen);
+    wsR['!cols'] = [{wch: 35}, {wch: 18}, {wch: 18}];
+    XLSX.utils.book_append_sheet(wb, wsR, 'Resumen');
+
+    // Guardar
+    const cliente = (document.getElementById('cliente').value || 'cliente').replace(/[^a-zA-Z0-9_\-]/g, '_');
+    const fecha = new Date().toISOString().split('T')[0];
+    XLSX.writeFile(wb, `cotizacion_${cliente}_${fecha}.xlsx`);
+  } catch (err) {
+    alert('Error al exportar a Excel: ' + err.message);
+    console.error(err);
+  }
+}
+
+async function importarDesdeExcel(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  if (!confirm(`¿Importar la cotización del archivo "${file.name}"?\nEsto reemplazará la cotización actual.`)) {
+    event.target.value = '';
+    return;
+  }
+  try {
+    await loadSheetJS();
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const data = new Uint8Array(e.target.result);
+        const wb = XLSX.read(data, { type: 'array' });
+
+        // === Datos Generales ===
+        const dgSheet = wb.Sheets['Datos Generales'];
+        if (dgSheet) {
+          const dgData = XLSX.utils.sheet_to_json(dgSheet, { header: 1 });
+          const dgMap = {};
+          dgData.forEach(row => { if (row && row[0]) dgMap[String(row[0]).trim()] = row[1]; });
+          if (dgMap['Cliente'] !== undefined) document.getElementById('cliente').value = dgMap['Cliente'];
+          if (dgMap['Periodo'] !== undefined) document.getElementById('periodo').value = dgMap['Periodo'];
+          if (dgMap['Unidad Duración'] !== undefined) document.getElementById('unidadDuracion').value = dgMap['Unidad Duración'];
+          if (dgMap['Cantidad Duración'] !== undefined) document.getElementById('cantidadDuracion').value = dgMap['Cantidad Duración'];
+          if (dgMap['% Reinversión'] !== undefined) document.getElementById('pctReinversion').value = dgMap['% Reinversión'];
+          if (dgMap['% Comisión OC'] !== undefined) document.getElementById('pctComisionOC').value = dgMap['% Comisión OC'];
+          if (dgMap['% Administrativo OC'] !== undefined) document.getElementById('pctAdministrativo').value = dgMap['% Administrativo OC'];
+          if (dgMap['% IVA'] !== undefined) document.getElementById('pctIVA').value = dgMap['% IVA'];
+          if (dgMap['% Renta'] !== undefined) document.getElementById('pctRenta').value = dgMap['% Renta'];
+        }
+
+        // === Servicios ===
+        const sSheet = wb.Sheets['Servicios'];
+        if (sSheet) {
+          const sData = XLSX.utils.sheet_to_json(sSheet);
+          if (sData.length > 0) {
+            servicios = [];
+            const periodoActual = document.getElementById('periodo').value;
+            const modalidades = TARIFARIOS[periodoActual].modalidades;
+            sData.forEach(row => {
+              let modIdx;
+              const modName = String(row['Modalidad'] || '').trim().toUpperCase();
+              if (modName === 'PERSONALIZADO') {
+                modIdx = 'personalizado';
+              } else {
+                const idx = modalidades.findIndex(m => m.n.toUpperCase() === modName);
+                modIdx = idx >= 0 ? String(idx) : '0';
+              }
+              servicios.push({
+                id: Date.now() + Math.random(),
+                modalidad: modIdx,
+                sector: (row['Sector'] || 'comercial').toString().toLowerCase(),
+                armamento: (row['Armamento'] || 'sin').toString().toLowerCase(),
+                puestos: parseFloat(row['Puestos']) || 1,
+                vigilantes: parseFloat(row['Vigilantes/Puesto']) || 4,
+                custom: {
+                  nombre: row['CustomNombre'] || '',
+                  horasD: parseFloat(row['CustomHorasD']) || 0,
+                  horasN: parseFloat(row['CustomHorasN']) || 0,
+                  dias: parseFloat(row['CustomDias']) || 30,
+                  jornadaD: parseFloat(row['CustomJornadaD']) || 15,
+                  jornadaN: parseFloat(row['CustomJornadaN']) || 9,
+                  pctD: parseFloat(row['CustomPctD']) || 55.97,
+                  pctN: parseFloat(row['CustomPctN']) || 44.03
+                },
+                adicionales: {
+                  cantDiurnos: parseFloat(row['AdicGuardiasDiurnos']) || 0,
+                  vrDiurno: parseFloat(row['AdicVrDiurno']) || 80000,
+                  cantNocturnos: parseFloat(row['AdicGuardiasNocturnos']) || 0,
+                  vrNocturno: parseFloat(row['AdicVrNocturno']) || 100000,
+                  diasMes: parseFloat(row['AdicDiasMes']) || 20
+                }
+              });
+            });
+          }
+        }
+
+        // === Otros Costos ===
+        const ocSheet = wb.Sheets['Otros Costos'];
+        if (ocSheet) {
+          const ocData = XLSX.utils.sheet_to_json(ocSheet);
+          valoresOC = {};
+          cantidadesOC = {};
+          ocData.forEach(row => {
+            const concepto = row['Concepto'];
+            if (concepto) {
+              if (row['Vr Unitario'] !== undefined && row['Vr Unitario'] !== null && row['Vr Unitario'] !== '') {
+                valoresOC[concepto] = parseFloat(row['Vr Unitario']);
+              }
+              if (row['Cantidad'] !== undefined && row['Cantidad'] !== null && row['Cantidad'] !== '') {
+                cantidadesOC[concepto] = parseFloat(row['Cantidad']);
+              }
+            }
+          });
+        }
+
+        // Re-render todo
+        onCambioUnidadDuracion();
+        renderServicios();
+        guardarEstado();
+        alert(`✓ Cotización importada correctamente desde Excel:\n- ${servicios.length} servicio(s)\n- Cliente: ${document.getElementById('cliente').value}\n- Periodo: ${document.getElementById('periodo').value}`);
+      } catch (err) {
+        alert('Error al procesar el Excel: ' + err.message);
+        console.error(err);
+      }
+    };
+    reader.readAsArrayBuffer(file);
+  } catch (err) {
+    alert('Error: ' + err.message);
+  }
+  event.target.value = '';
+}
+
+// Manejo de cantidades editables en Bloque D Otros Costos
+function onCantidadOCChange(concepto, valor) {
+  if (valor === '' || valor === null || valor === undefined) {
+    delete cantidadesOC[concepto];
+  } else {
+    cantidadesOC[concepto] = parseFloat(valor);
+  }
+  recalcular();
+  guardarEstado();
+}
+
+// Manejo de valores unitarios editables en Bloque D Otros Costos
+function onValorOCChange(concepto, valor) {
+  if (valor === '' || valor === null || valor === undefined) {
+    delete valoresOC[concepto];
+  } else {
+    valoresOC[concepto] = parseFloat(valor);
+  }
+  recalcular();
+  guardarEstado();
+}
+
+function restaurarCantidadesOC() {
+  if (!confirm('¿Restaurar TODOS los valores y cantidades del Bloque D a sus valores por defecto?')) return;
+  cantidadesOC = {};
+  valoresOC = {};
+  recalcular();
+  guardarEstado();
+}
+
+// =====================================================
+// PERSISTENCIA: guardar/cargar estado en localStorage
+// =====================================================
+const STORAGE_KEY = 'cotizador_ensis_v1';
+
+function obtenerEstadoActual() {
+  return {
+    cliente: document.getElementById('cliente').value,
+    periodo: document.getElementById('periodo').value,
+    unidadDuracion: document.getElementById('unidadDuracion').value,
+    cantidadDuracion: document.getElementById('cantidadDuracion').value,
+    pctReinversion: document.getElementById('pctReinversion').value,
+    pctComisionOC: document.getElementById('pctComisionOC').value,
+    pctAdministrativo: document.getElementById('pctAdministrativo').value,
+    pctIVA: document.getElementById('pctIVA').value,
+    pctRenta: document.getElementById('pctRenta').value,
+    servicios: servicios,
+    cantidadesOC: cantidadesOC,
+    valoresOC: valoresOC,
+    fechaGuardado: new Date().toISOString()
+  };
+}
+
+let timerGuardado = null;
+function guardarEstado() {
+  // Debounce: agrupa cambios rápidos
+  clearTimeout(timerGuardado);
+  timerGuardado = setTimeout(() => {
+    try {
+      const state = obtenerEstadoActual();
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      mostrarIndicadorGuardado();
+    } catch (e) {
+      console.error('Error guardando estado:', e);
+    }
+  }, 400);
+}
+
+function mostrarIndicadorGuardado() {
+  const ind = document.getElementById('indicadorGuardado');
+  if (!ind) return;
+  ind.style.opacity = '1';
+  clearTimeout(window._timerIndic);
+  window._timerIndic = setTimeout(() => { ind.style.opacity = '0'; }, 1500);
+}
+
+function cargarEstadoGuardado() {
+  const raw = localStorage.getItem(STORAGE_KEY);
+  if (!raw) return false;
+  try {
+    const state = JSON.parse(raw);
+    document.getElementById('cliente').value = state.cliente || 'CLIENTE NUEVO';
+    document.getElementById('periodo').value = state.periodo || 'julio15-diciembre';
+    document.getElementById('unidadDuracion').value = state.unidadDuracion || 'meses';
+    document.getElementById('cantidadDuracion').value = state.cantidadDuracion || '5.57';
+    document.getElementById('pctReinversion').value = state.pctReinversion || '7.57';
+    document.getElementById('pctComisionOC').value = state.pctComisionOC || '2';
+    document.getElementById('pctAdministrativo').value = state.pctAdministrativo || '14';
+    document.getElementById('pctIVA').value = state.pctIVA || '19';
+    document.getElementById('pctRenta').value = state.pctRenta || '35';
+    servicios = (state.servicios && state.servicios.length > 0) ? state.servicios : [nuevoServicio()];
+    cantidadesOC = state.cantidadesOC || {};
+    valoresOC = state.valoresOC || {};
+    onCambioUnidadDuracion();
+    return true;
+  } catch (e) {
+    console.error('Error cargando estado:', e);
+    return false;
+  }
+}
+
+function limpiarTodo() {
+  if (!confirm('¿Borrar TODA la cotización actual y empezar de cero?\n\nEsta acción no se puede deshacer.')) return;
+  localStorage.removeItem(STORAGE_KEY);
+  location.reload();
+}
+
+function exportarJSON() {
+  const state = obtenerEstadoActual();
+  const cliente = (state.cliente || 'cliente').replace(/[^a-zA-Z0-9_\-]/g, '_');
+  const fecha = new Date().toISOString().split('T')[0];
+  const nombre = `cotizacion_${cliente}_${fecha}.json`;
+  const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = nombre;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function importarJSON(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  if (!confirm(`¿Cargar la cotización del archivo "${file.name}"?\nEsto reemplazará lo que tengas actualmente en pantalla.`)) {
+    event.target.value = '';
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const state = JSON.parse(e.target.result);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      location.reload();
+    } catch (err) {
+      alert('Error al leer el archivo: ' + err.message);
+    }
+  };
+  reader.readAsText(file);
+  event.target.value = '';
+}
+
+// =====================================================
+// ENTREGABLE CLIENTE (vista limpia)
+// =====================================================
+function generarEntregableCliente() {
+  const cliente = document.getElementById('cliente').value || 'CLIENTE';
+  const periodo = document.getElementById('periodo').value;
+  const meses = obtenerMesesEfectivos() || 1;
+  const unidadDur = document.getElementById('unidadDuracion').value;
+  const cantidadDur = parseFloat(document.getElementById('cantidadDuracion').value) || 0;
+  const pctReinv = (parseFloat(document.getElementById('pctReinversion').value) || 0) / 100;
+  const pctIVA = (parseFloat(document.getElementById('pctIVA').value) || 0) / 100;
+  const fechaHoy = new Date().toLocaleDateString('es-CO', { year: 'numeric', month: 'long', day: 'numeric' });
+
+  // Texto humanizado de duración
+  let duracionTexto;
+  if (unidadDur === 'dias') {
+    duracionTexto = cantidadDur + ' días (' + (cantidadDur/30).toFixed(2) + ' meses equivalentes)';
+  } else {
+    duracionTexto = cantidadDur + ' meses (' + Math.round(cantidadDur*30) + ' días equivalentes)';
+  }
+
+  let nombrePeriodo = '';
+  if (periodo === 'enero-junio') nombrePeriodo = 'Primer semestre 2026 (enero - junio)';
+  else if (periodo === 'julio-1al14') nombrePeriodo = 'Julio 1 - 14 de 2026';
+  else nombrePeriodo = 'Segundo semestre 2026 (julio 15 - diciembre 31)';
+
+  const esCortoPlazo = (unidadDur === 'dias');
+  const factor = meses; // meses_efectivos
+  let totalIngreso = 0;
+  let filasServicios = '';
+  let servicios_con_valor = 0;
+  let servicios_omitidos = 0;
+
+  servicios.forEach((s) => {
+    const r = calcularServicio(s, periodo, pctIVA);
+    // Solo incluir servicios con valor cotizado > 0 (entregable limpio para cliente)
+    if (r.totalParcialConIVA <= 0) {
+      servicios_omitidos++;
+      return;
+    }
+    totalIngreso += r.totalParcialConIVA;
+    servicios_con_valor++;
+    // Si es por días: mostrar valor del contrato por servicio (proporcional)
+    // Si es por meses: mostrar valor mensual
+    const vrUnitarioMostrar = esCortoPlazo ? (r.totalConIVA * factor) : r.totalConIVA;
+    const vrTotalMostrar = esCortoPlazo ? (r.totalParcialConIVA * factor) : r.totalParcialConIVA;
+    filasServicios += `
+      <tr>
+        <td style="text-align:center;">${servicios_con_valor}</td>
+        <td>${r.mod.n}</td>
+        <td style="text-align:center;">${s.puestos}</td>
+        <td class="num">${fmt(vrUnitarioMostrar)}</td>
+        <td class="num"><strong>${fmt(vrTotalMostrar)}</strong></td>
+      </tr>
+    `;
+  });
+
+  // Reinversión calculada sobre Total SIN IVA (sumado de todos los servicios)
+  let totalSinIVAEntregable = 0;
+  servicios.forEach(s => {
+    const r = calcularServicio(s, periodo, pctIVA);
+    totalSinIVAEntregable += r.vrParcial;
+  });
+  const reinversionMensual = totalSinIVAEntregable * pctReinv;
+  const totalContrato = totalIngreso * meses;
+  const reinversionContrato = reinversionMensual * meses;
+  // Etiqueta dinámica de columna y total
+  const lblColUnitario = esCortoPlazo ? `Valor por puesto del contrato (con IVA)` : `Valor unitario / mes (con IVA)`;
+  const lblColTotal = esCortoPlazo ? `Valor total del contrato (con IVA)` : `Valor total / mes (con IVA)`;
+  const lblFilaTotal = esCortoPlazo ? `TOTAL DEL CONTRATO CON IVA` : `TOTAL FACTURACIÓN MENSUAL CON IVA`;
+  const valFilaTotal = esCortoPlazo ? totalContrato : totalIngreso;
+
+  const html = `<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Cotización ENSIS Security — ${escHtml(cliente)}</title>
+<style>
+  * { box-sizing: border-box; }
+  body { font-family: 'Georgia', 'Times New Roman', serif; margin: 0; padding: 40px; background: #fff; color: #222; }
+  .container { max-width: 900px; margin: 0 auto; }
+  .header { border-bottom: 4px solid #1a3a5c; padding-bottom: 18px; margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center; }
+  .header .marca { font-size: 24px; font-weight: bold; color: #1a3a5c; letter-spacing: 1px; }
+  .header .marca .sub { display: block; font-size: 11px; font-weight: normal; color: #666; letter-spacing: 2px; margin-top: 4px; }
+  .header .sello-ed { font-size: 11px; color: #1a3a5c; text-align: right; }
+  .header .sello-ed .nombre { font-weight: bold; font-size: 13px; }
+  .titulo { text-align: center; font-size: 22px; font-weight: bold; color: #1a3a5c; margin: 30px 0 8px 0; letter-spacing: 1px; }
+  .subtitulo { text-align: center; font-size: 14px; color: #555; margin-bottom: 30px; font-style: italic; }
+  .meta { background: #f4f6f8; padding: 14px 20px; border-radius: 6px; margin-bottom: 26px; }
+  .meta-row { display: flex; justify-content: space-between; padding: 4px 0; font-size: 14px; }
+  .meta-row .label { font-weight: bold; color: #1a3a5c; }
+  .meta-row .valor { color: #222; }
+  table { width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 13px; }
+  thead th { background: #1a3a5c; color: #fff; padding: 10px 8px; text-align: left; font-family: 'Segoe UI', Arial, sans-serif; }
+  tbody td { padding: 10px 8px; border-bottom: 1px solid #ddd; font-family: 'Segoe UI', Arial, sans-serif; }
+  td.num { text-align: right; font-variant-numeric: tabular-nums; }
+  tr.total td { background: #f4c542; font-weight: bold; font-size: 14px; }
+  .compromiso { background: #fff8d6; border-left: 5px solid #f4c542; padding: 18px 22px; margin: 26px 0; border-radius: 4px; }
+  .compromiso h3 { margin: 0 0 10px 0; color: #1a3a5c; font-family: 'Segoe UI', Arial, sans-serif; font-size: 15px; }
+  .compromiso p { margin: 6px 0; font-size: 13px; line-height: 1.6; }
+  .compromiso .monto { font-size: 20px; font-weight: bold; color: #1a3a5c; }
+  .resumen-final { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 22px 0; }
+  .resumen-box { padding: 16px; border: 2px solid #1a3a5c; border-radius: 6px; text-align: center; }
+  .resumen-box .lab { font-size: 11px; color: #555; text-transform: uppercase; letter-spacing: 1px; }
+  .resumen-box .val { font-size: 22px; font-weight: bold; color: #1a3a5c; margin-top: 6px; font-family: 'Segoe UI', Arial, sans-serif; }
+  .condiciones { font-size: 11px; color: #555; line-height: 1.7; margin-top: 20px; border-top: 1px solid #ccc; padding-top: 14px; }
+  .firmas { margin-top: 50px; display: grid; grid-template-columns: 1fr 1fr; gap: 60px; }
+  .firma { text-align: center; }
+  .firma .linea { border-top: 1px solid #222; padding-top: 6px; font-size: 12px; }
+  .firma .nombre { font-weight: bold; font-size: 13px; margin-bottom: 4px; }
+  footer { margin-top: 40px; padding-top: 14px; border-top: 2px solid #1a3a5c; text-align: center; font-size: 11px; color: #666; }
+  footer .sello-foot { font-weight: bold; color: #1a3a5c; font-size: 12px; }
+  .acciones-cliente { text-align: center; margin: 20px 0; }
+  .acciones-cliente button { padding: 12px 22px; background: #1a3a5c; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: 600; margin: 0 6px; font-family: 'Segoe UI', Arial, sans-serif; }
+  .acciones-cliente button:hover { background: #0f2236; }
+  @media print {
+    body { padding: 20px; }
+    .acciones-cliente { display: none; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+<div class="header">
+  <div class="marca">
+    ENSIS SECURITY LTDA.
+    <span class="sub">SEGURIDAD Y VIGILANCIA PRIVADA</span>
+  </div>
+  <div class="sello-ed">
+    <div class="nombre">Edith Royero</div>
+    <div>Financiera</div>
+    <div style="margin-top:6px;">Fecha: ${fechaHoy}</div>
+  </div>
+</div>
+
+<div class="titulo">PROPUESTA COMERCIAL</div>
+<div class="subtitulo">Servicios de Vigilancia y Seguridad Privada</div>
+
+<div class="meta">
+  <div class="meta-row"><span class="label">Cliente:</span> <span class="valor">${escHtml(cliente)}</span></div>
+  <div class="meta-row"><span class="label">Periodo de prestación:</span> <span class="valor">${nombrePeriodo}</span></div>
+  <div class="meta-row"><span class="label">Duración del contrato:</span> <span class="valor">${duracionTexto}</span></div>
+  <div class="meta-row"><span class="label">N° de servicios cotizados:</span> <span class="valor">${servicios_con_valor}</span></div>
+</div>
+
+<h3 style="color:#1a3a5c; font-family:'Segoe UI',Arial,sans-serif; border-bottom:2px solid #f4c542; padding-bottom:6px;">Detalle de servicios cotizados</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th style="width:8%; text-align:center;">#</th>
+      <th>Descripción del servicio</th>
+      <th style="width:12%; text-align:center;">Puestos</th>
+      <th style="width:18%; text-align:right;">${lblColUnitario}</th>
+      <th style="width:20%; text-align:right;">${lblColTotal}</th>
+    </tr>
+  </thead>
+  <tbody>
+    ${filasServicios}
+    <tr class="total">
+      <td colspan="4" style="text-align:right;">${lblFilaTotal}</td>
+      <td class="num">${fmt(valFilaTotal)}</td>
+    </tr>
+    <tr style="background:#fff8d6;">
+      <td colspan="4" style="text-align:right; font-weight:bold; color:#1a3a5c;">${esCortoPlazo ? 'REINVERSIÓN DEL CONTRATO' : 'REINVERSIÓN MENSUAL'} (${(pctReinv*100).toFixed(2)}%)</td>
+      <td class="num" style="font-weight:bold; color:#1a3a5c;">${fmt(esCortoPlazo ? reinversionContrato : reinversionMensual)}</td>
+    </tr>
+    <tr style="background:#e9ecef;">
+      <td colspan="4" style="text-align:right; font-weight:bold;">${esCortoPlazo ? 'VALOR DEL CONTRATO DESCONTANDO REINVERSIÓN' : 'VALOR MENSUAL DESCONTANDO REINVERSIÓN'}</td>
+      <td class="num" style="font-weight:bold;">${fmt((esCortoPlazo ? totalContrato : totalIngreso) - (esCortoPlazo ? reinversionContrato : reinversionMensual))}</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="compromiso">
+  <h3>Compromiso de Reinversión ENSIS Security</h3>
+  <p>Como parte de nuestra propuesta de valor, <strong>ENSIS Security Ltda.</strong> se compromete a destinar el <strong>${(pctReinv*100).toFixed(2)}% del valor del servicio</strong> a reinversión en <strong>capacitación del personal, renovación de equipos, dotación, tecnología y mejora continua del servicio</strong> asignado al cliente.</p>
+</div>
+
+<div class="condiciones">
+  <strong style="color:#1a3a5c;">Condiciones generales:</strong>
+  <ul style="margin:8px 0; padding-left:20px;">
+    <li>Tarifas conforme a la <strong>Circular Externa 20251300000115CS</strong> de la Superintendencia de Vigilancia y Seguridad Privada.</li>
+    <li>IVA del 19% calculado sobre AIU (base gravable Art. 462-1 del Estatuto Tributario).</li>
+    <li>La nómina del personal se ajusta al SMMLV vigente (Decreto 0159 de 2026) y a la jornada laboral de 42 horas semanales (Ley 2101 de 2021 y Circular 0040 del MinTrabajo).</li>
+    <li>Forma de pago: mensual anticipado dentro de los primeros cinco (5) días hábiles del mes.</li>
+    <li>Esta propuesta tiene una vigencia de quince (15) días calendario a partir de su emisión.</li>
+    <li>Cualquier variación en el SMMLV, regulación tributaria o normativa Supervigilancia generará ajuste tarifario proporcional.</li>
+  </ul>
+</div>
+
+<div class="firmas">
+  <div class="firma">
+    <div class="nombre">Por ENSIS SECURITY LTDA.</div>
+    <div class="linea">Representante legal</div>
+  </div>
+  <div class="firma">
+    <div class="nombre">Por ${escHtml(cliente)}</div>
+    <div class="linea">Representante autorizado</div>
+  </div>
+</div>
+
+<footer>
+  <div class="sello-foot">Edith Royero | Financiera — ENSIS Security Ltda.</div>
+  <div>Propuesta generada el ${fechaHoy}</div>
+</footer>
+
+<div class="acciones-cliente">
+  <button onclick="window.print()">🖨️ Imprimir / Guardar como PDF</button>
+  <button onclick="window.close()">✖ Cerrar</button>
+</div>
+
+</div>
+</body>
+</html>`;
+
+  const ventana = window.open('', '_blank', 'width=900,height=900,scrollbars=yes');
+  if (!ventana) {
+    alert('El navegador bloqueó la ventana emergente. Permite ventanas emergentes para este sitio y vuelve a intentar.');
+    return;
+  }
+  ventana.document.write(html);
+  ventana.document.close();
+}
+
+// =====================================================
+// INIT
+// =====================================================
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('fechaGen').textContent = new Date().toLocaleDateString('es-CO');
+  // Intentar cargar estado guardado, si no hay → arrancar con 1 servicio
+  const cargado = cargarEstadoGuardado();
+  if (!cargado) {
+    servicios = [nuevoServicio()];
+  }
+  renderServicios();
+  // Listeners de panel general
+  document.getElementById('periodo').addEventListener('change', () => { renderServicios(); guardarEstado(); });
+  document.getElementById('cliente').addEventListener('input', () => { recalcular(); guardarEstado(); });
+  document.getElementById('cantidadDuracion').addEventListener('input', () => { recalcular(); guardarEstado(); });
+  document.getElementById('unidadDuracion').addEventListener('change', () => { onCambioUnidadDuracion(); recalcular(); guardarEstado(); });
+  ['pctReinversion','pctComisionOC','pctAdministrativo','pctIVA','pctRenta'].forEach(id => {
+    document.getElementById(id).addEventListener('input', () => { recalcular(); guardarEstado(); });
+  });
+});
+</script>
+</body>
+</html>

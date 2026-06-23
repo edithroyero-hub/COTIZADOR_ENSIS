@@ -1,0 +1,28 @@
+# Archivos del sistema operativo
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Archivos temporales
+*.tmp
+*.bak
+*~
+
+# IDEs
+.vscode/
+.idea/
+
+# Excels de prueba (no subir cotizaciones reales)
+COTIZACION_*.xlsx
+PROPUESTA *.xlsx
+TARIFARIO *.xlsx
+*.pptx
+
+# JSONs de cotizaciones reales
+cotizacion_*.json
+
+# Carpeta del sistema multi-agente (metodología interna)
+.claude/
+
+# Logs
+*.log
