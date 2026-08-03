@@ -242,6 +242,7 @@
 <div class="acciones" style="flex-wrap:wrap;">
   <button onclick="window.print()">🖨️ Imprimir / Guardar como PDF</button>
   <button class="exito" onclick="generarEntregableCliente()">📄 Generar entregable CLIENTE</button>
+  <button class="exito" style="background:#5a2a82;" onclick="generarReporteGerencial()">📈 Reporte Gerencial (Ingresos / Costos / Rentabilidad)</button>
   <button class="exito" onclick="exportarAExcel()">📊 Exportar a Excel (.xlsx)</button>
   <button class="exito" onclick="document.getElementById('inputImportExcel').click()">📥 Importar desde Excel (.xlsx)</button>
   <input type="file" id="inputImportExcel" accept=".xlsx,.xls" style="display:none;" onchange="importarDesdeExcel(event)">
@@ -1177,6 +1178,422 @@ function loadSheetJS() {
     script.onerror = () => reject(new Error('No se pudo cargar la librería Excel. Verifica conexión a internet.'));
     document.head.appendChild(script);
   });
+}
+
+// =====================================================
+// REPORTE GERENCIAL — Ingresos, Costos, Rentabilidad
+// =====================================================
+function generarReporteGerencial() {
+  const cliente = document.getElementById('cliente').value || 'CLIENTE';
+  const periodo = document.getElementById('periodo').value;
+  const meses = obtenerMesesEfectivos() || 1;
+  const unidadDur = document.getElementById('unidadDuracion').value;
+  const cantidadDur = parseFloat(document.getElementById('cantidadDuracion').value) || 0;
+  const pctReinv = (parseFloat(document.getElementById('pctReinversion').value) || 0) / 100;
+  const pctComOC = (parseFloat(document.getElementById('pctComisionOC').value) || 0) / 100;
+  const pctAdmin = (parseFloat(document.getElementById('pctAdministrativo').value) || 0) / 100;
+  const pctIVA = (parseFloat(document.getElementById('pctIVA').value) || 0) / 100;
+  const pctRenta = (parseFloat(document.getElementById('pctRenta').value) || 0) / 100;
+  const fechaHoy = new Date().toLocaleDateString('es-CO', { year: 'numeric', month: 'long', day: 'numeric' });
+
+  let nombrePeriodo = periodo === 'enero-junio' ? 'Enero - Junio 2026 (jornada 44h/sem)'
+    : periodo === 'julio-1al14' ? 'Julio 1-14 2026 (jornada 44h/sem)'
+    : 'Julio 15 - Diciembre 31 2026 (jornada 42h/sem)';
+  const duracionTexto = unidadDur === 'dias' ? `${cantidadDur} días` : `${cantidadDur} meses`;
+
+  // Calcular todos los servicios (solo los con valor > 0)
+  let totalIngreso = 0, totalSinIVA = 0, totalIVATotal = 0, totalPuestos = 0, totalVigEq = 0, totalAdicionalesAcum = 0;
+  let filasServicios = '', numServicio = 0;
+  servicios.forEach((s) => {
+    const r = calcularServicio(s, periodo, pctIVA);
+    if (r.totalParcialConIVA <= 0) return;
+    numServicio++;
+    totalIngreso += r.totalParcialConIVA;
+    totalSinIVA += r.vrParcial;
+    totalIVATotal += r.ivaTotal;
+    totalPuestos += (parseFloat(s.puestos) || 0);
+    totalVigEq += (parseFloat(s.vigilantes) || 0) * (parseFloat(s.puestos) || 0);
+    totalAdicionalesAcum += r.totalAdicionales;
+    filasServicios += `
+      <tr>
+        <td style="text-align:center;">${numServicio}</td>
+        <td>${r.mod.n}${s.sector==='residencial'?' [RES]':''}${s.armamento==='con'?' [ARM]':''}</td>
+        <td style="text-align:center;">${s.puestos}</td>
+        <td style="text-align:center;">${s.vigilantes}</td>
+        <td class="num">${fmt(r.totalParcialConIVA)}</td>
+        <td class="num">${fmt(r.totalParcialConIVA * meses)}</td>
+      </tr>`;
+  });
+
+  // Nómina consolidada
+  const totalNominaBase = servicios.reduce((acc, s) => {
+    const r = calcularServicio(s, periodo, pctIVA);
+    if (r.totalParcialConIVA <= 0) return acc;
+    const tv = (parseFloat(s.vigilantes) || 0) * (parseFloat(s.puestos) || 0);
+    return acc + CONCEPTOS_NOMINA.reduce((a, c) => a + c.v * tv, 0);
+  }, 0);
+  const totalMOD = totalNominaBase + totalAdicionalesAcum;
+
+  // Otros Costos consolidado
+  let subtotalOpOC = 0, filasOC = '';
+  OTROS_COSTOS_OP.forEach(oc => {
+    const autoCant = oc.cantPorVig ? totalVigEq : totalPuestos;
+    const vrA = (valoresOC[oc.c] !== undefined && valoresOC[oc.c] !== '') ? parseFloat(valoresOC[oc.c]) : oc.v;
+    const cantA = (cantidadesOC[oc.c] !== undefined && cantidadesOC[oc.c] !== '') ? parseFloat(cantidadesOC[oc.c]) : autoCant;
+    const total = oc.anual ? (vrA * cantA / 12) : (vrA * cantA);
+    if (total <= 0) return;
+    subtotalOpOC += total;
+    filasOC += `<tr><td>${oc.c}${oc.anual?' <span style="color:#888;font-size:11px;">(anual/12)</span>':''}</td><td class="num">${fmt(vrA)}</td><td style="text-align:center;">${cantA}</td><td class="num">${fmt(total)}</td></tr>`;
+  });
+  const comisionOC = totalIngreso * pctComOC;
+  const administrativoOC = totalSinIVA * pctAdmin;
+  const totalOC = subtotalOpOC + comisionOC + administrativoOC;
+
+  // Reinversión sobre Total SIN IVA
+  const reinversion = totalSinIVA * pctReinv;
+
+  // Costo total y rentabilidad
+  const costoTotal = totalMOD + reinversion + totalOC;
+  const utilidadBruta = totalIngreso - costoTotal;
+  const rentaPagar = utilidadBruta > 0 ? utilidadBruta * pctRenta : 0;
+  const utilidadNeta = utilidadBruta - rentaPagar;
+  const margenBruto = totalIngreso > 0 ? utilidadBruta / totalIngreso : 0;
+  const margenNeto = totalIngreso > 0 ? utilidadNeta / totalIngreso : 0;
+
+  // Veredicto
+  let veredicto, colorVer;
+  if (utilidadNeta < 0) { veredicto = '🔴 FALLO — Utilidad neta NEGATIVA'; colorVer = '#dc3545'; }
+  else if (margenNeto < 0.05) { veredicto = '🟠 ALERTA — Margen neto < 5%'; colorVer = '#e67e22'; }
+  else if (margenNeto < 0.10) { veredicto = '🟡 ATENCIÓN — Margen neto entre 5% y 10%'; colorVer = '#f39c12'; }
+  else if (margenNeto < 0.20) { veredicto = '🟢 OK — Margen neto entre 10% y 20%'; colorVer = '#27ae60'; }
+  else { veredicto = '🟢 EXCELENTE — Margen neto > 20%'; colorVer = '#27ae60'; }
+
+  // Función helper para formato de %
+  const pctFmt = (n) => totalIngreso > 0 ? ((n/totalIngreso)*100).toFixed(2) + '%' : '0%';
+
+  const html = `<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Reporte Gerencial — ${escHtml(cliente)}</title>
+<style>
+  * { box-sizing: border-box; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; margin: 0; padding: 30px; background: #f4f6f8; color: #222; }
+  .container { max-width: 1100px; margin: 0 auto; background: #fff; padding: 32px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+  .header { border-bottom: 3px solid #5a2a82; padding-bottom: 18px; margin-bottom: 22px; display: flex; justify-content: space-between; align-items: center; }
+  .header .marca { font-size: 22px; font-weight: bold; color: #5a2a82; }
+  .header .marca .sub { display: block; font-size: 11px; font-weight: normal; color: #666; letter-spacing: 2px; margin-top: 4px; }
+  .header .sello-ed { text-align: right; font-size: 11px; color: #5a2a82; }
+  .header .sello-ed .nombre { font-weight: bold; font-size: 13px; }
+  .titulo-principal { text-align: center; font-size: 26px; font-weight: bold; color: #5a2a82; margin: 20px 0 4px 0; letter-spacing: 1px; }
+  .subtitulo-principal { text-align: center; font-size: 14px; color: #666; margin-bottom: 26px; font-style: italic; }
+  .badge-confidencial { background:#dc3545; color:#fff; padding:4px 10px; border-radius:12px; font-size:10px; font-weight:bold; letter-spacing:1px; display:inline-block; }
+  .meta { background: #f8f4fc; padding: 14px 20px; border-radius: 6px; margin-bottom: 20px; border-left: 4px solid #5a2a82; }
+  .meta-row { display: flex; justify-content: space-between; padding: 3px 0; font-size: 13px; }
+  .meta-row .label { font-weight: bold; color: #5a2a82; }
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 20px 0; }
+  .kpi { background: #fff; padding: 14px; border-radius: 8px; border: 2px solid #e0d0f0; text-align: center; }
+  .kpi.ingreso { border-color: #27ae60; background: #d5f5e3; }
+  .kpi.costo { border-color: #e67e22; background: #fdebd0; }
+  .kpi.utilidad-pos { border-color: #27ae60; background: #d5f5e3; }
+  .kpi.utilidad-neg { border-color: #dc3545; background: #fadbd8; }
+  .kpi .lab { font-size: 11px; color: #666; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+  .kpi .val { font-size: 18px; font-weight: bold; color: #333; }
+  .kpi .subval { font-size: 11px; color: #666; margin-top: 4px; }
+  h3 { color: #5a2a82; border-bottom: 2px solid #5a2a82; padding-bottom: 6px; margin: 24px 0 12px 0; font-size: 16px; }
+  table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 13px; }
+  thead th { background: #5a2a82; color: #fff; padding: 9px; text-align: left; }
+  tbody td { padding: 8px 9px; border-bottom: 1px solid #eee; }
+  td.num { text-align: right; font-variant-numeric: tabular-nums; }
+  tr.subtotal td { background: #f8f4fc; font-weight: bold; }
+  tr.total td { background: #5a2a82; color: #fff; font-weight: bold; font-size: 14px; }
+  .rentabilidad-tabla tr td:first-child { padding-left: 12px; }
+  .rentabilidad-tabla tr.principal td { background: #f8f4fc; font-weight: bold; }
+  .rentabilidad-tabla tr.utilidad td { background: #d5f5e3; font-weight: bold; color: #155724; }
+  .rentabilidad-tabla tr.utilidad-neg td { background: #fadbd8; font-weight: bold; color: #721c24; }
+  .veredicto { padding: 16px; border-radius: 6px; text-align: center; margin-top: 20px; font-weight: bold; font-size: 16px; color: #fff; }
+  .composicion { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 20px 0; }
+  .composicion h4 { color: #5a2a82; font-size: 13px; margin: 0 0 8px 0; }
+  .barra { background: #eee; height: 22px; border-radius: 3px; position: relative; margin-bottom: 6px; overflow: hidden; }
+  .barra .fill { height: 100%; display: flex; align-items: center; padding-left: 6px; color: #fff; font-size: 11px; font-weight: bold; }
+  .composicion-item { margin-bottom: 8px; }
+  .composicion-item .lab { font-size: 12px; display: flex; justify-content: space-between; margin-bottom: 3px; }
+  footer { margin-top: 26px; padding-top: 14px; border-top: 2px solid #5a2a82; text-align: center; font-size: 11px; color: #666; }
+  footer .sello-foot { font-weight: bold; color: #5a2a82; font-size: 12px; }
+  .acciones { text-align: center; margin: 20px 0; }
+  .acciones button { padding: 12px 22px; background: #5a2a82; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: 600; margin: 0 6px; }
+  .acciones button:hover { background: #431f61; }
+  @media print { body { background:#fff; padding:15px; } .acciones { display:none; } .container { box-shadow:none; padding:0; } }
+</style>
+</head>
+<body>
+<div class="container">
+
+<div class="header">
+  <div class="marca">
+    ENSIS SECURITY LTDA.
+    <span class="sub">REPORTE GERENCIAL INTERNO</span>
+  </div>
+  <div class="sello-ed">
+    <div class="nombre">Edith Royero</div>
+    <div>Financiera</div>
+    <div style="margin-top:6px;">${fechaHoy}</div>
+    <div style="margin-top:6px;"><span class="badge-confidencial">CONFIDENCIAL</span></div>
+  </div>
+</div>
+
+<div class="titulo-principal">REPORTE GERENCIAL DEL PROYECTO</div>
+<div class="subtitulo-principal">Ingresos · Costos · Rentabilidad</div>
+
+<div class="meta">
+  <div class="meta-row"><span class="label">Cliente:</span> <span>${escHtml(cliente)}</span></div>
+  <div class="meta-row"><span class="label">Periodo tarifario:</span> <span>${nombrePeriodo}</span></div>
+  <div class="meta-row"><span class="label">Duración del contrato:</span> <span>${duracionTexto}</span></div>
+  <div class="meta-row"><span class="label">Servicios cotizados:</span> <span>${numServicio}</span></div>
+  <div class="meta-row"><span class="label">Puestos totales:</span> <span>${totalPuestos}</span></div>
+  <div class="meta-row"><span class="label">Vigilantes totales:</span> <span>${totalVigEq}</span></div>
+</div>
+
+<!-- ============ KPI GRID ============ -->
+<div class="kpi-grid">
+  <div class="kpi ingreso">
+    <div class="lab">💰 Ingreso Mensual</div>
+    <div class="val">${fmt(totalIngreso)}</div>
+    <div class="subval">Total contrato: ${fmt(totalIngreso * meses)}</div>
+  </div>
+  <div class="kpi costo">
+    <div class="lab">💸 Costo Total Mensual</div>
+    <div class="val">${fmt(costoTotal)}</div>
+    <div class="subval">${((costoTotal/totalIngreso)*100).toFixed(1)}% del ingreso</div>
+  </div>
+  <div class="kpi ${utilidadNeta >= 0 ? 'utilidad-pos' : 'utilidad-neg'}">
+    <div class="lab">✅ Utilidad Neta Mensual</div>
+    <div class="val">${fmt(utilidadNeta)}</div>
+    <div class="subval">Margen: ${(margenNeto*100).toFixed(2)}%</div>
+  </div>
+  <div class="kpi ${utilidadNeta >= 0 ? 'utilidad-pos' : 'utilidad-neg'}">
+    <div class="lab">📈 Utilidad Total Contrato</div>
+    <div class="val">${fmt(utilidadNeta * meses)}</div>
+    <div class="subval">Utilidad bruta: ${fmt(utilidadBruta)}/mes</div>
+  </div>
+</div>
+
+<!-- ============ INGRESOS ============ -->
+<h3>1. INGRESOS — Servicios cotizados</h3>
+<table>
+  <thead>
+    <tr>
+      <th style="width:6%; text-align:center;">#</th>
+      <th>Servicio</th>
+      <th style="width:8%; text-align:center;">Puestos</th>
+      <th style="width:10%; text-align:center;">Vigilantes</th>
+      <th style="width:17%; text-align:right;">Ingreso Mensual</th>
+      <th style="width:17%; text-align:right;">Ingreso Total (${duracionTexto})</th>
+    </tr>
+  </thead>
+  <tbody>
+    ${filasServicios}
+    <tr class="total">
+      <td colspan="4" style="text-align:right;">TOTAL INGRESOS (con IVA)</td>
+      <td class="num">${fmt(totalIngreso)}</td>
+      <td class="num">${fmt(totalIngreso * meses)}</td>
+    </tr>
+    <tr class="subtotal">
+      <td colspan="4" style="text-align:right;">IVA total incluido en ingresos</td>
+      <td class="num">${fmt(totalIVATotal)}</td>
+      <td class="num">${fmt(totalIVATotal * meses)}</td>
+    </tr>
+    <tr class="subtotal">
+      <td colspan="4" style="text-align:right;">Ingreso neto (sin IVA)</td>
+      <td class="num">${fmt(totalSinIVA)}</td>
+      <td class="num">${fmt(totalSinIVA * meses)}</td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- ============ COSTOS ============ -->
+<h3>2. COSTOS DEL PROYECTO</h3>
+
+<h4 style="color:#5a2a82; font-size:13px; margin-top:14px;">2.1 MOD — Mano de Obra Directa (Nómina)</h4>
+<table>
+  <tbody>
+    <tr>
+      <td>Nómina base vigilantes (${totalVigEq} vig × conceptos CST)</td>
+      <td class="num">${fmt(totalNominaBase)}</td>
+      <td class="num">${pctFmt(totalNominaBase)}</td>
+    </tr>
+    ${totalAdicionalesAcum > 0 ? `
+    <tr>
+      <td>Turnos adicionales (guardias extra)</td>
+      <td class="num">${fmt(totalAdicionalesAcum)}</td>
+      <td class="num">${pctFmt(totalAdicionalesAcum)}</td>
+    </tr>` : ''}
+    <tr class="subtotal">
+      <td>Subtotal MOD</td>
+      <td class="num">${fmt(totalMOD)}</td>
+      <td class="num">${pctFmt(totalMOD)}</td>
+    </tr>
+  </tbody>
+</table>
+
+<h4 style="color:#5a2a82; font-size:13px; margin-top:14px;">2.2 Otros Costos operativos</h4>
+<table>
+  <thead>
+    <tr>
+      <th>Concepto</th>
+      <th style="width:15%; text-align:right;">Vr Unitario</th>
+      <th style="width:10%; text-align:center;">Cantidad</th>
+      <th style="width:20%; text-align:right;">Total Mensual</th>
+    </tr>
+  </thead>
+  <tbody>
+    ${filasOC}
+    <tr class="subtotal"><td colspan="3">Subtotal operativos</td><td class="num">${fmt(subtotalOpOC)}</td></tr>
+    <tr><td>Comisión Otros Costos (${(pctComOC*100).toFixed(2)}% sobre Total con IVA)</td><td></td><td></td><td class="num">${fmt(comisionOC)}</td></tr>
+    <tr><td>Administrativo (${(pctAdmin*100).toFixed(2)}% sobre Total sin IVA)</td><td></td><td></td><td class="num">${fmt(administrativoOC)}</td></tr>
+    <tr class="subtotal"><td colspan="3">Subtotal Otros Costos</td><td class="num">${fmt(totalOC)}</td></tr>
+  </tbody>
+</table>
+
+<h4 style="color:#5a2a82; font-size:13px; margin-top:14px;">2.3 Reinversión</h4>
+<table>
+  <tbody>
+    <tr>
+      <td>Reinversión (${(pctReinv*100).toFixed(2)}% sobre Total sin IVA — capacitación, equipos, dotación)</td>
+      <td class="num">${fmt(reinversion)}</td>
+      <td class="num">${pctFmt(reinversion)}</td>
+    </tr>
+  </tbody>
+</table>
+
+<h4 style="color:#5a2a82; font-size:13px; margin-top:14px;">2.4 Costo Total Consolidado</h4>
+<table>
+  <tbody>
+    <tr class="subtotal"><td>MOD (Nómina + Adicionales)</td><td class="num">${fmt(totalMOD)}</td><td class="num">${pctFmt(totalMOD)}</td></tr>
+    <tr class="subtotal"><td>Otros Costos</td><td class="num">${fmt(totalOC)}</td><td class="num">${pctFmt(totalOC)}</td></tr>
+    <tr class="subtotal"><td>Reinversión</td><td class="num">${fmt(reinversion)}</td><td class="num">${pctFmt(reinversion)}</td></tr>
+    <tr class="total"><td>COSTO TOTAL DEL PROYECTO</td><td class="num">${fmt(costoTotal)}</td><td class="num">${pctFmt(costoTotal)}</td></tr>
+  </tbody>
+</table>
+
+<!-- ============ RENTABILIDAD ============ -->
+<h3>3. RENTABILIDAD DEL PROYECTO</h3>
+<table class="rentabilidad-tabla">
+  <thead>
+    <tr>
+      <th>Concepto</th>
+      <th style="width:20%; text-align:right;">Mensual</th>
+      <th style="width:20%; text-align:right;">Total contrato (${duracionTexto})</th>
+      <th style="width:12%; text-align:right;">% Ingreso</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr class="principal">
+      <td>(+) INGRESO OPERATIVO (con IVA)</td>
+      <td class="num">${fmt(totalIngreso)}</td>
+      <td class="num">${fmt(totalIngreso * meses)}</td>
+      <td class="num">100,00%</td>
+    </tr>
+    <tr>
+      <td>(-) Costo Total del Proyecto</td>
+      <td class="num">${fmt(costoTotal)}</td>
+      <td class="num">${fmt(costoTotal * meses)}</td>
+      <td class="num">${pctFmt(costoTotal)}</td>
+    </tr>
+    <tr class="${utilidadBruta >= 0 ? 'utilidad' : 'utilidad-neg'}">
+      <td>(=) UTILIDAD BRUTA</td>
+      <td class="num">${fmt(utilidadBruta)}</td>
+      <td class="num">${fmt(utilidadBruta * meses)}</td>
+      <td class="num">${(margenBruto*100).toFixed(2)}%</td>
+    </tr>
+    <tr>
+      <td>(-) Renta ${(pctRenta*100).toFixed(0)}% (sociedades)</td>
+      <td class="num">${fmt(rentaPagar)}</td>
+      <td class="num">${fmt(rentaPagar * meses)}</td>
+      <td class="num">${pctFmt(rentaPagar)}</td>
+    </tr>
+    <tr class="${utilidadNeta >= 0 ? 'utilidad' : 'utilidad-neg'}">
+      <td>(=) UTILIDAD NETA DESPUÉS DE IMPUESTOS</td>
+      <td class="num">${fmt(utilidadNeta)}</td>
+      <td class="num">${fmt(utilidadNeta * meses)}</td>
+      <td class="num">${(margenNeto*100).toFixed(2)}%</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="veredicto" style="background:${colorVer};">
+  Veredicto del auditor: ${veredicto}
+</div>
+
+<!-- ============ COMPOSICIÓN ============ -->
+<h3>4. ANÁLISIS DE COMPOSICIÓN — Estructura financiera</h3>
+<div class="composicion">
+  <div>
+    <h4>Composición del ingreso mensual</h4>
+    ${[
+      { l: 'MOD (Nómina)', v: totalMOD, c: '#e67e22' },
+      { l: 'Otros Costos', v: totalOC, c: '#3498db' },
+      { l: 'Reinversión', v: reinversion, c: '#9b59b6' },
+      { l: 'Renta', v: rentaPagar, c: '#dc3545' },
+      { l: 'Utilidad neta', v: utilidadNeta > 0 ? utilidadNeta : 0, c: '#27ae60' }
+    ].map(item => {
+      const pct = totalIngreso > 0 ? (item.v/totalIngreso)*100 : 0;
+      return `
+      <div class="composicion-item">
+        <div class="lab"><span>${item.l}</span><span>${fmt(item.v)} (${pct.toFixed(2)}%)</span></div>
+        <div class="barra"><div class="fill" style="width:${Math.max(0,pct)}%; background:${item.c};">${pct.toFixed(1)}%</div></div>
+      </div>`;
+    }).join('')}
+  </div>
+  <div>
+    <h4>Indicadores clave</h4>
+    <table>
+      <tbody>
+        <tr><td>Margen bruto</td><td class="num"><strong>${(margenBruto*100).toFixed(2)}%</strong></td></tr>
+        <tr><td>Margen neto (después impuestos)</td><td class="num"><strong>${(margenNeto*100).toFixed(2)}%</strong></td></tr>
+        <tr><td>Ratio costo/ingreso</td><td class="num">${((costoTotal/totalIngreso)*100).toFixed(2)}%</td></tr>
+        <tr><td>% MOD sobre ingreso</td><td class="num">${((totalMOD/totalIngreso)*100).toFixed(2)}%</td></tr>
+        <tr><td>% Reinversión</td><td class="num">${((reinversion/totalIngreso)*100).toFixed(2)}%</td></tr>
+        <tr><td>Impuesto sobre utilidad bruta</td><td class="num">${(pctRenta*100).toFixed(0)}%</td></tr>
+        <tr><td>Utilidad por vigilante/mes</td><td class="num">${totalVigEq > 0 ? fmt(utilidadNeta/totalVigEq) : '$0'}</td></tr>
+        <tr><td>Ingreso por puesto/mes</td><td class="num">${totalPuestos > 0 ? fmt(totalIngreso/totalPuestos) : '$0'}</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<h3>5. TRAZABILIDAD Y CUMPLIMIENTO NORMATIVO</h3>
+<ul style="font-size: 12px; line-height: 1.7; color: #555;">
+  <li>Tarifas ajustadas a <strong>Circular Externa 20251300000115CS</strong> — Supervigilancia (30-dic-2025)</li>
+  <li>SMMLV aplicado: $1.750.905 (<strong>Decreto 0159 de 2026</strong> transitorio)</li>
+  <li>Jornada laboral vigilancia: 42h/sem desde 15-jul-2026 (<strong>Circular 0040 MinTrabajo</strong> + Ley 2101/2021)</li>
+  <li>Recargo dominical 80% en 2026 (<strong>Ley 2466 de 2025</strong>)</li>
+  <li>Exoneración aportes Salud/ICBF/SENA (<strong>Ley 1819/2016 art. 65</strong>)</li>
+  <li>IVA con base gravable AIU (<strong>Art. 462-1 ET</strong>)</li>
+</ul>
+
+<footer>
+  <div class="sello-foot">Edith Royero | Financiera — ENSIS Security Ltda.</div>
+  <div>Reporte gerencial generado el ${fechaHoy}</div>
+  <div style="margin-top:6px; color:#dc3545; font-weight:bold;">⚠ DOCUMENTO CONFIDENCIAL — Uso interno ENSIS únicamente</div>
+</footer>
+
+<div class="acciones">
+  <button onclick="window.print()">🖨️ Imprimir / Guardar como PDF</button>
+  <button onclick="window.close()">✖ Cerrar</button>
+</div>
+
+</div>
+</body>
+</html>`;
+
+  const ventana = window.open('', '_blank', 'width=1100,height=900,scrollbars=yes');
+  if (!ventana) {
+    alert('El navegador bloqueó la ventana emergente. Permite ventanas emergentes y vuelve a intentar.');
+    return;
+  }
+  ventana.document.write(html);
+  ventana.document.close();
 }
 
 async function exportarAExcel() {
