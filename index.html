@@ -2180,6 +2180,7 @@ function generarEntregableCliente() {
       <td colspan="4" style="text-align:right;">${lblFilaTotal}</td>
       <td class="num">${fmt(valFilaTotal)}</td>
     </tr>
+    ${(reinversionMensual > 0 && pctReinv > 0) ? `
     <tr style="background:#fff8d6;">
       <td colspan="4" style="text-align:right; font-weight:bold; color:#1a3a5c;">${esCortoPlazo ? 'REINVERSIÓN DEL CONTRATO' : 'REINVERSIÓN MENSUAL'} (${(pctReinv*100).toFixed(2)}%)</td>
       <td class="num" style="font-weight:bold; color:#1a3a5c;">${fmt(esCortoPlazo ? reinversionContrato : reinversionMensual)}</td>
@@ -2188,13 +2189,16 @@ function generarEntregableCliente() {
       <td colspan="4" style="text-align:right; font-weight:bold;">${esCortoPlazo ? 'VALOR DEL CONTRATO DESCONTANDO REINVERSIÓN' : 'VALOR MENSUAL DESCONTANDO REINVERSIÓN'}</td>
       <td class="num" style="font-weight:bold;">${fmt((esCortoPlazo ? totalContrato : totalIngreso) - (esCortoPlazo ? reinversionContrato : reinversionMensual))}</td>
     </tr>
+    ` : ''}
   </tbody>
 </table>
 
+${(pctReinv > 0 && reinversionMensual > 0) ? `
 <div class="compromiso">
   <h3>Compromiso de Reinversión ENSIS Security</h3>
   <p>Como parte de nuestra propuesta de valor, <strong>ENSIS Security Ltda.</strong> se compromete a destinar el <strong>${(pctReinv*100).toFixed(2)}% del valor del servicio</strong> a reinversión en <strong>capacitación del personal, renovación de equipos, dotación, tecnología y mejora continua del servicio</strong> asignado al cliente.</p>
 </div>
+` : ''}
 
 <div class="condiciones">
   <strong style="color:#1a3a5c;">Condiciones generales:</strong>
