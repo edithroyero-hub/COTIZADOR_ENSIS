@@ -175,7 +175,7 @@
   <table>
     <thead>
       <tr>
-        <th>#</th><th>Servicio</th><th>Vr Unitario base/mes</th><th>AyS</th>
+        <th>#</th><th>Servicio</th><th>📍 Ubicación</th><th>Vr Unitario base/mes</th><th>AyS</th>
         <th>Puestos</th><th>TOTAL MES (ref)</th><th>TOTAL CONTRATO con IVA</th>
       </tr>
     </thead>
@@ -462,6 +462,7 @@ function nuevoServicio() {
   return {
     id: Date.now() + Math.random(),
     modalidad: "0",
+    ubicacion: "",
     sector: "comercial",
     armamento: "sin",
     puestos: 1,
@@ -711,6 +712,10 @@ function renderServicios() {
         <div>
           <label>Modalidad del servicio</label>
           <select data-field="modalidad">${optionsHtml}</select>
+        </div>
+        <div>
+          <label>📍 Ubicación del servicio</label>
+          <input type="text" data-field="ubicacion" value="${escHtml(s.ubicacion || '')}" placeholder="Ej. Sede Bogotá - Portería principal">
         </div>
         <div>
           <label>Sector</label>
@@ -975,6 +980,7 @@ function recalcular() {
       <tr>
         <td>${idx + 1}</td>
         <td>${r.mod.n}${s.sector==='residencial'?' [RES]':''}${s.armamento==='con'?' [ARM]':''}</td>
+        <td style="font-size:12px; color:#555;">${escHtml(s.ubicacion || '—')}</td>
         <td class="num">${fmt(r.valorBase)}</td>
         <td class="num">${fmt(r.vrAyS)}</td>
         <td class="num">${s.puestos}</td>
@@ -993,7 +999,7 @@ function recalcular() {
   const totalContratoConsolidado = totalIngreso * factorContrato;
   htmlTabla += `
     <tr class="total">
-      <td colspan="4">TOTAL CONSOLIDADO (${servicios.length} servicio(s), ${totalPuestos} puesto(s))</td>
+      <td colspan="5">TOTAL CONSOLIDADO (${servicios.length} servicio(s), ${totalPuestos} puesto(s))</td>
       <td class="num">${totalPuestos}</td>
       <td class="num">${fmt(totalIngreso)}</td>
       <td class="num">${fmt(totalContratoConsolidado)}</td>
@@ -1218,6 +1224,7 @@ function generarReporteGerencial() {
       <tr>
         <td style="text-align:center;">${numServicio}</td>
         <td>${r.mod.n}${s.sector==='residencial'?' [RES]':''}${s.armamento==='con'?' [ARM]':''}</td>
+        <td style="font-size:12px; color:#555;">${escHtml(s.ubicacion || '—')}</td>
         <td style="text-align:center;">${s.puestos}</td>
         <td style="text-align:center;">${s.vigilantes}</td>
         <td class="num">${fmt(r.totalParcialConIVA)}</td>
@@ -1383,28 +1390,29 @@ function generarReporteGerencial() {
 <table>
   <thead>
     <tr>
-      <th style="width:6%; text-align:center;">#</th>
+      <th style="width:5%; text-align:center;">#</th>
       <th>Servicio</th>
-      <th style="width:8%; text-align:center;">Puestos</th>
-      <th style="width:10%; text-align:center;">Vigilantes</th>
-      <th style="width:17%; text-align:right;">Ingreso Mensual</th>
-      <th style="width:17%; text-align:right;">Ingreso Total (${duracionTexto})</th>
+      <th style="width:15%;">📍 Ubicación</th>
+      <th style="width:7%; text-align:center;">Puestos</th>
+      <th style="width:9%; text-align:center;">Vigilantes</th>
+      <th style="width:15%; text-align:right;">Ingreso Mensual</th>
+      <th style="width:15%; text-align:right;">Ingreso Total (${duracionTexto})</th>
     </tr>
   </thead>
   <tbody>
     ${filasServicios}
     <tr class="total">
-      <td colspan="4" style="text-align:right;">TOTAL INGRESOS (con IVA)</td>
+      <td colspan="5" style="text-align:right;">TOTAL INGRESOS (con IVA)</td>
       <td class="num">${fmt(totalIngreso)}</td>
       <td class="num">${fmt(totalIngreso * meses)}</td>
     </tr>
     <tr class="subtotal">
-      <td colspan="4" style="text-align:right;">IVA total incluido en ingresos</td>
+      <td colspan="5" style="text-align:right;">IVA total incluido en ingresos</td>
       <td class="num">${fmt(totalIVATotal)}</td>
       <td class="num">${fmt(totalIVATotal * meses)}</td>
     </tr>
     <tr class="subtotal">
-      <td colspan="4" style="text-align:right;">Ingreso neto (sin IVA)</td>
+      <td colspan="5" style="text-align:right;">Ingreso neto (sin IVA)</td>
       <td class="num">${fmt(totalSinIVA)}</td>
       <td class="num">${fmt(totalSinIVA * meses)}</td>
     </tr>
@@ -1623,7 +1631,7 @@ async function exportarAExcel() {
 
     // ============== Sheet 2: Servicios (solo con valor cotizado > 0) ==============
     const pctIVAExp = (parseFloat(document.getElementById('pctIVA').value) || 0) / 100;
-    const headerServ = ['#', 'Modalidad', 'Sector', 'Armamento', 'Puestos', 'Vigilantes/Puesto',
+    const headerServ = ['#', 'Modalidad', 'Ubicacion', 'Sector', 'Armamento', 'Puestos', 'Vigilantes/Puesto',
       'CustomNombre', 'CustomHorasD', 'CustomHorasN', 'CustomDias', 'CustomJornadaD', 'CustomJornadaN', 'CustomPctD', 'CustomPctN',
       'AdicGuardiasDiurnos', 'AdicVrDiurno', 'AdicGuardiasNocturnos', 'AdicVrNocturno', 'AdicDiasMes',
       'Vr Servicio (con IVA)'];
@@ -1645,6 +1653,7 @@ async function exportarAExcel() {
       dataServ.push([
         idxServ,
         modNombre,
+        s.ubicacion || '',
         s.sector || 'comercial',
         s.armamento || 'sin',
         s.puestos || 1,
@@ -1810,6 +1819,7 @@ async function importarDesdeExcel(event) {
               servicios.push({
                 id: Date.now() + Math.random(),
                 modalidad: modIdx,
+                ubicacion: row['Ubicacion'] || '',
                 sector: (row['Sector'] || 'comercial').toString().toLowerCase(),
                 armamento: (row['Armamento'] || 'sin').toString().toLowerCase(),
                 puestos: parseFloat(row['Puestos']) || 1,
@@ -2066,6 +2076,7 @@ function generarEntregableCliente() {
       <tr>
         <td style="text-align:center;">${servicios_con_valor}</td>
         <td>${r.mod.n}</td>
+        <td style="font-size:12px; color:#555;">${escHtml(s.ubicacion || '—')}</td>
         <td style="text-align:center;">${s.puestos}</td>
         <td class="num">${fmt(vrUnitarioMostrar)}</td>
         <td class="num"><strong>${fmt(vrTotalMostrar)}</strong></td>
@@ -2167,9 +2178,10 @@ function generarEntregableCliente() {
 <table>
   <thead>
     <tr>
-      <th style="width:8%; text-align:center;">#</th>
+      <th style="width:5%; text-align:center;">#</th>
       <th>Descripción del servicio</th>
-      <th style="width:12%; text-align:center;">Puestos</th>
+      <th style="width:15%;">📍 Ubicación</th>
+      <th style="width:10%; text-align:center;">Puestos</th>
       <th style="width:18%; text-align:right;">${lblColUnitario}</th>
       <th style="width:20%; text-align:right;">${lblColTotal}</th>
     </tr>
@@ -2177,16 +2189,16 @@ function generarEntregableCliente() {
   <tbody>
     ${filasServicios}
     <tr class="total">
-      <td colspan="4" style="text-align:right;">${lblFilaTotal}</td>
+      <td colspan="5" style="text-align:right;">${lblFilaTotal}</td>
       <td class="num">${fmt(valFilaTotal)}</td>
     </tr>
     ${(reinversionMensual > 0 && pctReinv > 0) ? `
     <tr style="background:#fff8d6;">
-      <td colspan="4" style="text-align:right; font-weight:bold; color:#1a3a5c;">${esCortoPlazo ? 'REINVERSIÓN DEL CONTRATO' : 'REINVERSIÓN MENSUAL'} (${(pctReinv*100).toFixed(2)}%)</td>
+      <td colspan="5" style="text-align:right; font-weight:bold; color:#1a3a5c;">${esCortoPlazo ? 'REINVERSIÓN DEL CONTRATO' : 'REINVERSIÓN MENSUAL'} (${(pctReinv*100).toFixed(2)}%)</td>
       <td class="num" style="font-weight:bold; color:#1a3a5c;">${fmt(esCortoPlazo ? reinversionContrato : reinversionMensual)}</td>
     </tr>
     <tr style="background:#e9ecef;">
-      <td colspan="4" style="text-align:right; font-weight:bold;">${esCortoPlazo ? 'VALOR DEL CONTRATO DESCONTANDO REINVERSIÓN' : 'VALOR MENSUAL DESCONTANDO REINVERSIÓN'}</td>
+      <td colspan="5" style="text-align:right; font-weight:bold;">${esCortoPlazo ? 'VALOR DEL CONTRATO DESCONTANDO REINVERSIÓN' : 'VALOR MENSUAL DESCONTANDO REINVERSIÓN'}</td>
       <td class="num" style="font-weight:bold;">${fmt((esCortoPlazo ? totalContrato : totalIngreso) - (esCortoPlazo ? reinversionContrato : reinversionMensual))}</td>
     </tr>
     ` : ''}
