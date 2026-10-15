@@ -467,6 +467,7 @@ function nuevoServicio() {
     armamento: "sin",
     puestos: 1,
     vigilantes: 4,
+    descuentoProntoPago: 0,
     custom: {
       nombre: "SERVICIO 12 HORAS NOCTURNAS PERMANENTES",
       horasD: 0,
@@ -739,6 +740,11 @@ function renderServicios() {
           <label>Vigilantes por puesto</label>
           <input type="number" data-field="vigilantes" value="${s.vigilantes}" min="0.5" step="0.5" class="editable">
           <div class="nota">Sugerido auto-editable</div>
+        </div>
+        <div>
+          <label>💰 % Descuento Pronto Pago</label>
+          <div class="input-row"><input type="number" data-field="descuentoProntoPago" value="${s.descuentoProntoPago || 0}" min="0" max="100" step="0.01" class="editable" style="background:#fff8d6;"><span>%</span></div>
+          <div class="nota">0 si no aplica. Se muestra al cliente.</div>
         </div>
       </div>
       ${customPanelHtml}
@@ -2058,9 +2064,11 @@ function generarEntregableCliente() {
   const esCortoPlazo = (unidadDur === 'dias');
   const factor = meses; // meses_efectivos
   let totalIngreso = 0;
+  let totalDescuentoProntoPago = 0;
   let filasServicios = '';
   let servicios_con_valor = 0;
   let servicios_omitidos = 0;
+  let algunDescuentoProntoPago = false;
 
   servicios.forEach((s) => {
     const r = calcularServicio(s, periodo, pctIVA);
@@ -2076,6 +2084,11 @@ function generarEntregableCliente() {
     const vrUnitarioMostrar = esCortoPlazo ? (r.totalConIVA * factor) : r.totalConIVA;
     const vrTotalMostrar = esCortoPlazo ? (r.totalParcialConIVA * factor) : r.totalParcialConIVA;
     const armamentoTxt = s.armamento === 'con' ? '🔫 Con arma' : '🚫 Sin arma';
+    const pctDesc = parseFloat(s.descuentoProntoPago) || 0;
+    const descServicio = vrTotalMostrar * (pctDesc / 100);
+    totalDescuentoProntoPago += descServicio;
+    if (pctDesc > 0) algunDescuentoProntoPago = true;
+    const descCol = pctDesc > 0 ? `${pctDesc.toFixed(2)}% <br><span style="font-size:11px; color:#28a745;">(-${fmt(descServicio)})</span>` : '—';
     filasServicios += `
       <tr>
         <td style="text-align:center;">${servicios_con_valor}</td>
@@ -2085,6 +2098,7 @@ function generarEntregableCliente() {
         <td style="text-align:center;">${s.puestos}</td>
         <td class="num">${fmt(vrUnitarioMostrar)}</td>
         <td class="num"><strong>${fmt(vrTotalMostrar)}</strong></td>
+        <td style="text-align:center; font-size:12px; color:#28a745;">${descCol}</td>
       </tr>
     `;
   });
@@ -2185,11 +2199,12 @@ function generarEntregableCliente() {
     <tr>
       <th style="width:4%; text-align:center;">#</th>
       <th>Descripción del servicio</th>
-      <th style="width:14%;">📍 Ubicación</th>
-      <th style="width:12%; text-align:center;">Armamento</th>
-      <th style="width:8%; text-align:center;">Puestos</th>
-      <th style="width:16%; text-align:right;">${lblColUnitario}</th>
-      <th style="width:18%; text-align:right;">${lblColTotal}</th>
+      <th style="width:12%;">📍 Ubicación</th>
+      <th style="width:10%; text-align:center;">Armamento</th>
+      <th style="width:6%; text-align:center;">Puestos</th>
+      <th style="width:15%; text-align:right;">${lblColUnitario}</th>
+      <th style="width:16%; text-align:right;">${lblColTotal}</th>
+      <th style="width:12%; text-align:center;">💰 Desc. Pronto Pago</th>
     </tr>
   </thead>
   <tbody>
@@ -2197,19 +2212,40 @@ function generarEntregableCliente() {
     <tr class="total">
       <td colspan="6" style="text-align:right;">${lblFilaTotal}</td>
       <td class="num">${fmt(valFilaTotal)}</td>
+      <td></td>
     </tr>
+    ${algunDescuentoProntoPago ? `
+    <tr style="background:#d4edda;">
+      <td colspan="6" style="text-align:right; font-weight:bold; color:#155724;">(-) DESCUENTO POR PRONTO PAGO</td>
+      <td class="num" style="font-weight:bold; color:#155724;">-${fmt(totalDescuentoProntoPago)}</td>
+      <td></td>
+    </tr>
+    <tr style="background:#28a745; color:#fff;">
+      <td colspan="6" style="text-align:right; font-weight:bold; color:#fff;">${esCortoPlazo ? 'VALOR DEL CONTRATO CON DESCUENTO PRONTO PAGO' : 'VALOR MENSUAL CON DESCUENTO PRONTO PAGO'}</td>
+      <td class="num" style="font-weight:bold; color:#fff;">${fmt(valFilaTotal - totalDescuentoProntoPago)}</td>
+      <td></td>
+    </tr>
+    ` : ''}
     ${(reinversionMensual > 0 && pctReinv > 0) ? `
     <tr style="background:#fff8d6;">
       <td colspan="6" style="text-align:right; font-weight:bold; color:#1a3a5c;">${esCortoPlazo ? 'REINVERSIÓN DEL CONTRATO' : 'REINVERSIÓN MENSUAL'} (${(pctReinv*100).toFixed(2)}%)</td>
       <td class="num" style="font-weight:bold; color:#1a3a5c;">${fmt(esCortoPlazo ? reinversionContrato : reinversionMensual)}</td>
+      <td></td>
     </tr>
     <tr style="background:#e9ecef;">
       <td colspan="6" style="text-align:right; font-weight:bold;">${esCortoPlazo ? 'VALOR DEL CONTRATO DESCONTANDO REINVERSIÓN' : 'VALOR MENSUAL DESCONTANDO REINVERSIÓN'}</td>
       <td class="num" style="font-weight:bold;">${fmt((esCortoPlazo ? totalContrato : totalIngreso) - (esCortoPlazo ? reinversionContrato : reinversionMensual))}</td>
+      <td></td>
     </tr>
     ` : ''}
   </tbody>
 </table>
+${algunDescuentoProntoPago ? `
+<div style="margin-top:14px; padding:12px; background:#d4edda; border-radius:6px; border-left:4px solid #28a745; font-size:13px;">
+  <strong style="color:#155724;">💰 Descuento por Pronto Pago:</strong>
+  <span>Si el pago se realiza dentro de los términos convenidos de pronto pago, el valor final será de <strong>${fmt(valFilaTotal - totalDescuentoProntoPago)}</strong> (ahorro de ${fmt(totalDescuentoProntoPago)}).</span>
+</div>
+` : ''}
 
 ${(pctReinv > 0 && reinversionMensual > 0) ? `
 <div class="compromiso">
